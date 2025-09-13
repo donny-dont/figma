@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import 'package:change_case/change_case.dart';
 import 'package:code_builder/code_builder.dart' as code;
 import 'package:dart_style/dart_style.dart';
 import 'package:yaml/yaml.dart';
 
+import 'src/reference.dart';
 import 'src/schema.dart';
 import 'src/spec.dart';
 
@@ -20,7 +20,16 @@ List<String> _allowList = <String>[
   'RGB',
 ];
 
-List<String> _denyList = <String>['VariableValue', 'Transform', 'Emoji'];
+List<String> _denyList = <String>[
+  'VariableValue',
+  'Transform',
+  'Emoji',
+  'Paint',
+  'SolidPaint',
+  'GradientPaint',
+  'ImagePaint',
+  'PatternPaint',
+];
 
 bool allowed(Schema schema) => !_denyList.contains(schema.name);
 //_allowList.contains(schema.name);
@@ -86,7 +95,7 @@ Future<void> main() async {
 
   for (final schema in schemas.schemas.where(allowed)) {
     final library = schemaLibrary(schema);
-    final path = 'lib/src/models/${schema.name.toSnakeCase()}.dart';
+    final path = 'lib/src/models/${schema.dartFile}';
     writes.add(writeLibrary(path, library));
   }
 

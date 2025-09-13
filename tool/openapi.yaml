@@ -2663,6 +2663,8 @@ components:
             the `pluginData` parameter to include the string "shared".
         boundVariables:
           type: object
+          x-dart-type: LayerTraitVariables
+          default: {}
           description: A mapping of field to the variables applied to this field. Most
             fields will only map to a single `VariableAlias`. However, for
             properties like `fills`, `strokes`, `size`, `componentProperties`,
@@ -2671,6 +2673,7 @@ components:
           properties:
             size:
               type: object
+              x-dart-type: SizeVariableAlias
               properties:
                 x:
                   $ref: "#/components/schemas/VariableAlias"
@@ -2781,12 +2784,16 @@ components:
               type: object
               properties:
                 RECTANGLE_TOP_LEFT_CORNER_RADIUS:
+                  x-dart-name: topLeft
                   $ref: "#/components/schemas/VariableAlias"
                 RECTANGLE_TOP_RIGHT_CORNER_RADIUS:
+                  x-dart-name: topRight
                   $ref: "#/components/schemas/VariableAlias"
                 RECTANGLE_BOTTOM_LEFT_CORNER_RADIUS:
+                  x-dart-name: bottomLeft
                   $ref: "#/components/schemas/VariableAlias"
                 RECTANGLE_BOTTOM_RIGHT_CORNER_RADIUS:
+                  x-dart-name: bottomRight
                   $ref: "#/components/schemas/VariableAlias"
         explicitVariableModes:
           type: object
@@ -2813,19 +2820,17 @@ components:
       type: object
       properties:
         absoluteBoundingBox:
+          $ref: "#/components/schemas/Rectangle"
+          nullable: true
           description: Bounding box of the node in absolute space coordinates.
-          oneOf:
-            - $ref: "#/components/schemas/Rectangle"
-            - type: "null"
         absoluteRenderBounds:
+          $ref: "#/components/schemas/Rectangle"
+          nullable: true
           description: The actual bounds of a node accounting for drop shadows, thick
             strokes, and anything else that may fall outside the node's regular
             bounding box defined in `x`, `y`, `width`, and `height`. The `x` and
             `y` inside this property represent the absolute position of the node
             on the page. This value will be `null` if the node is invisible.
-          oneOf:
-            - $ref: "#/components/schemas/Rectangle"
-            - type: "null"
         preserveRatio:
           type: boolean
           description: Keep height and width constrained to same ratio.
@@ -2874,7 +2879,7 @@ components:
             frames, ignored otherwise. Determines whether a layer should stretch
             along the parent's primary axis. A `0` corresponds to a fixed size
             and `1` corresponds to stretch.
-          x-dart-enum-values:
+          x-dart-enum-names:
             - fixed
             - stretch
           enum:
@@ -3184,9 +3189,8 @@ components:
             fillOverrideTable:
               type: object
               additionalProperties:
-                oneOf:
-                  - $ref: "#/components/schemas/PaintOverride"
-                  - type: "null"
+                $ref: "#/components/schemas/PaintOverride"
+                nullable: true
               description: Map from ID to PaintOverride for looking up fill overrides. To see
                 which regions are overriden, you must use the `geometry=paths`
                 option. Each path returned may have an `overrideID` which maps
@@ -3604,6 +3608,10 @@ components:
           WIDGET: "#/components/schemas/WidgetNode"
           DOCUMENT: "#/components/schemas/DocumentNode"
           CANVAS: "#/components/schemas/CanvasNode"
+      x-dart-mapping:
+        DOCUMENT: "DocumentNode"
+        CANVAS: "CanvasNode"
+        _: "SubcanvasNode"
     DocumentNode:
       allOf:
         - type: object
@@ -3636,9 +3644,8 @@ components:
               $ref: "#/components/schemas/RGBA"
               description: Background color of the canvas.
             prototypeStartNodeID:
-              type:
-                - string
-                - "null"
+              type: string
+              nullable: true
               description: Node ID that corresponds to the start frame for prototypes. This is
                 deprecated with the introduction of multiple flows. Please use
                 the `flowStartingPoints` field.
@@ -3672,6 +3679,8 @@ components:
         - $ref: "#/components/schemas/IsLayerTrait"
         - $ref: "#/components/schemas/HasExportSettingsTrait"
     SubcanvasNode:
+      x-dart-type: SubCanvasNode
+      x-dart-extends: Node
       oneOf:
         - $ref: "#/components/schemas/BooleanOperationNode"
         - $ref: "#/components/schemas/ComponentNode"
@@ -4428,6 +4437,8 @@ components:
           description: Color attached to corresponding position.
         boundVariables:
           type: object
+          x-dart-type: ColorStopVariables
+          default: {}
           description: The variables bound to a particular gradient stop
           properties:
             color:
@@ -4531,6 +4542,8 @@ components:
               description: Solid color of the paint
             boundVariables:
               type: object
+              x-dart-type: SolidPaintVariables
+              default: {}
               description: The variables bound to a particular field on this paint
               properties:
                 color:
@@ -4794,6 +4807,8 @@ components:
           description: Number of columns or rows
         boundVariables:
           type: object
+          x-dart-type: LayoutGridVariables
+          default: {}
           description: The variables bound to a particular field on this layout grid
           properties:
             gutterSize:
@@ -4844,6 +4859,8 @@ components:
           description: Whether this shadow is visible.
         boundVariables:
           type: object
+          x-dart-type: ShadowEffectVariables
+          default: {}
           description: The variables bound to a particular field on this shadow effect
           properties:
             radius:
@@ -4897,6 +4914,11 @@ components:
       oneOf:
         - $ref: "#/components/schemas/NormalBlurEffect"
         - $ref: "#/components/schemas/ProgressiveBlurEffect"
+      discriminator:
+        propertyName: blurType
+        mapping:
+          NORMAL: "#/components/schemas/NormalBlurEffect"
+          PROGRESSIVE: "#/components/schemas/ProgressiveBlurEffect"
     BaseBlurEffect:
       type: object
       description: Base properties shared by all blur effects
@@ -4917,6 +4939,8 @@ components:
           minimum: 0
         boundVariables:
           type: object
+          x-dart-type: BlurEffectVariables
+          default: {}
           description: The variables bound to a particular field on this blur effect
           properties:
             radius:
@@ -5075,6 +5099,12 @@ components:
         - $ref: "#/components/schemas/MonotoneNoiseEffect"
         - $ref: "#/components/schemas/MultitoneNoiseEffect"
         - $ref: "#/components/schemas/DuotoneNoiseEffect"
+      discriminator:
+        propertyName: noiseType
+        mapping:
+          MONOTONE: "#/components/schemas/MonotoneNoiseEffect"
+          MULTITONE: "#/components/schemas/MultitoneNoiseEffect"
+          DUOTONE: "#/components/schemas/DuotoneNoiseEffect"
     Effect:
       oneOf:
         - $ref: "#/components/schemas/DropShadowEffect"
@@ -5251,9 +5281,8 @@ components:
           type: string
           description: Font family of text (standard name).
         fontPostScriptName:
-          type:
-            - string
-            - "null"
+          type: string
+          nullable: true
           description: PostScript font name.
         fontStyle:
           type: string
@@ -5404,6 +5433,8 @@ components:
                 fields are overrides if present.
             boundVariables:
               type: object
+              x-dart-type: TypeStyleVariables
+              default: {}
               description: The variables bound to a particular field on this style
               properties:
                 fontFamily:
@@ -5436,6 +5467,8 @@ components:
                 if present.
             boundVariables:
               type: object
+              x-dart-type: TextPathTypeStyleVariables
+              default: {}
               description: The variables bound to a particular field on this style
               properties:
                 fontFamily:
@@ -5520,6 +5553,8 @@ components:
             `INSTANCE_SWAP`.
         boundVariables:
           type: object
+          x-dart-type: ComponentPropertyVariables
+          default: {}
           description: The variables bound to a particular field on this component property
           properties:
             value:
@@ -5704,9 +5739,8 @@ components:
         more actions.
       properties:
         trigger:
-          oneOf:
-            - $ref: "#/components/schemas/Trigger"
-            - type: "null"
+          $ref: "#/components/schemas/Trigger"
+          nullable: true
           description: The user event that initiates the interaction.
         actions:
           type: array
@@ -5865,9 +5899,8 @@ components:
               enum:
                 - UPDATE_MEDIA_RUNTIME
             destinationId:
-              type:
-                - string
-                - "null"
+              type: string
+              nullable: true
             mediaAction:
               type: string
               enum:
@@ -5897,9 +5930,8 @@ components:
               enum:
                 - UPDATE_MEDIA_RUNTIME
             destinationId:
-              type:
-                - string
-                - "null"
+              type: string
+              nullable: true
             mediaAction:
               type: string
               enum:
@@ -5909,6 +5941,7 @@ components:
               type: number
           required:
             - type
+            - destinationId
             - mediaAction
             - amountToSkip
         - type: object
@@ -5927,9 +5960,8 @@ components:
               enum:
                 - UPDATE_MEDIA_RUNTIME
             destinationId:
-              type:
-                - string
-                - "null"
+              type: string
+              nullable: true
             mediaAction:
               type: string
               enum:
@@ -5938,6 +5970,7 @@ components:
               type: number
           required:
             - type
+            - destinationId
             - mediaAction
             - newTimestamp
     NodeAction:
@@ -5949,15 +5982,13 @@ components:
           enum:
             - NODE
         destinationId:
-          type:
-            - string
-            - "null"
+          type: string
+          nullable: true
         navigation:
           $ref: "#/components/schemas/Navigation"
         transition:
-          oneOf:
-            - $ref: "#/components/schemas/Transition"
-            - type: "null"
+          $ref: "#/components/schemas/Transition"
+          nullable: true
         preserveScrollPosition:
           type: boolean
           description: Whether the scroll offsets of any scrollable elements in the
@@ -6120,9 +6151,8 @@ components:
           enum:
             - SET_VARIABLE
         variableId:
-          type:
-            - string
-            - "null"
+          type: string
+          nullable: true
         variableValue:
           $ref: "#/components/schemas/VariableData"
       required:
@@ -6137,17 +6167,15 @@ components:
           enum:
             - SET_VARIABLE_MODE
         variableCollectionId:
-          type:
-            - string
-            - "null"
+          type: string
+          nullable: true
         variableModeId:
-          type:
-            - string
-            - "null"
+          type: string
+          nullable: true
       required:
         - type
-        - variableId
-        - variableMode
+        - variableCollectionId
+        - variableModeId
     ConditionalAction:
       type: object
       description: Checks if a condition is met before performing certain actions by
@@ -6173,6 +6201,7 @@ components:
         resolvedType:
           $ref: "#/components/schemas/VariableResolvedDataType"
         value:
+          x-dart-type: VariableDataValue
           oneOf:
             - type: boolean
             - type: number
@@ -6420,18 +6449,16 @@ components:
           format: date-time
           description: The UTC ISO 8601 time at which the comment was left
         resolved_at:
-          type:
-            - string
-            - "null"
+          type: string
+          nullable: true
           format: date-time
           description: If set, the UTC ISO 8601 time the comment was resolved
         message:
           type: string
           description: The content of the comment
         order_id:
-          type:
-            - string
-            - "null"
+          type: string
+          nullable: true
           description: Only set for top level comments. The number displayed with the
             comment in the UI
         reactions:
@@ -6445,6 +6472,7 @@ components:
         - file_key
         - user
         - created_at
+        - resolved_at
         - message
         - reactions
         - order_id
@@ -6512,31 +6540,31 @@ components:
         containingStateGroup:
           deprecated: true
           description: Deprecated - Use containingComponentSet instead.
-          oneOf:
-            - type: object
-              properties:
-                nodeId:
-                  type: string
-                  description: The ID of the state group node.
-                name:
-                  type: string
-                  description: The name of the state group node.
-            - type: "null"
+          type: object
+          properties:
+            nodeId:
+              type: string
+              description: The ID of the state group node.
+            name:
+              type: string
+              description: The name of the state group node.
+          nullable: true
         containingComponentSet:
           description: The component set node that contains the frame node.
-          oneOf:
-            - type: object
-              properties:
-                nodeId:
-                  type: string
-                  description: The ID of the component set node.
-                name:
-                  type: string
-                  description: The name of the component set node.
-            - type: "null"
+          type: object
+          properties:
+            nodeId:
+              type: string
+              description: The ID of the component set node.
+            name:
+              type: string
+              description: The name of the component set node.
+          nullable: true
       required:
         - pageId
         - pageName
+        - containingStateGroup
+        - containingComponentSet
     PublishedComponent:
       type: object
       description: An arrangement of published UI elements that can be instantiated
@@ -6712,14 +6740,12 @@ components:
           format: date-time
           description: The UTC ISO 8601 time at which the version was created
         label:
-          type:
-            - string
-            - "null"
+          type: string
+          nullable: true
           description: The label given to the version in the editor
         description:
-          type:
-            - string
-            - "null"
+          type: string
+          nullable: true
           description: The description of the version as entered in the editor
         user:
           $ref: "#/components/schemas/User"
@@ -6763,9 +6789,8 @@ components:
           $ref: "#/components/schemas/WebhookV2Status"
           description: The current status of the webhook
         client_id:
-          type:
-            - string
-            - "null"
+          type: string
+          nullable: true
           description: The client ID of the OAuth application that registered this
             webhook, if any
         passcode:
@@ -6776,9 +6801,8 @@ components:
           type: string
           description: The endpoint that will be hit when the webhook is triggered
         description:
-          type:
-            - string
-            - "null"
+          type: string
+          nullable: true
           description: Optional user-provided description or name for the webhook. This is
             provided to help make maintaining a number of webhooks more
             convenient. Max length 140 characters.
@@ -6827,9 +6851,8 @@ components:
         response_info:
           $ref: "#/components/schemas/WebhookV2ResponseInfo"
         error_msg:
-          type:
-            - string
-            - "null"
+          type: string
+          nullable: true
           description: Error message for this request. NULL if no error occurred
       required:
         - webhook_id
@@ -7403,40 +7426,20 @@ components:
           type: number
           description: The timestamp of the event in seconds since the Unix epoch.
         actor:
-          type:
-            - object
-            - "null"
+          $ref: "#/components/schemas/ActivityLogUserEntity"
+          nullable: true
           description: The user who performed the action.
-          properties:
-            type:
-              type: string
-              description: The type of the user.
-              enum:
-                - user
-            id:
-              type: string
-              description: The ID of the user.
-            name:
-              type: string
-              description: The name of the user. For SCIM events, the value is "SCIM
-                Provider". For official support actions, the value is "Figma
-                Support".
-            email:
-              type: string
-              description: The email of the user.
-          required:
-            - name
         action:
           type: object
+          x-dart-type: ActivityLogAction
           description: The task or activity the actor performed.
           properties:
             type:
               type: string
               description: The type of the action.
             details:
-              type:
-                - object
-                - "null"
+              type: object
+              nullable: true
               description: Metadata of the action. Each action type supports its own metadata
                 attributes.
               additionalProperties: true
@@ -7473,9 +7476,8 @@ components:
           description: Contextual information about the event.
           properties:
             client_name:
-              type:
-                - string
-                - "null"
+              type: string
+              nullable: true
               description: The third-party application that triggered the event, if
                 applicable.
             ip_address:
@@ -7489,9 +7491,8 @@ components:
               type: string
               description: The id of the organization where the event took place.
             team_id:
-              type:
-                - string
-                - "null"
+              type: string
+              nullable: true
               description: The id of the team where the event took place -- if this took place
                 in a specific team.
           required:
@@ -7648,7 +7649,7 @@ components:
           description: The modes of this variable collection.
           items:
             type: object
-            x-dart-name: Mode
+            x-dart-type: Mode
             properties:
               modeId:
                 type: string
@@ -7707,24 +7708,12 @@ components:
           type: string
           description: The id of the variable collection that contains this variable.
         resolvedType:
-          type: string
-          description: The resolved type of the variable.
-          enum:
-            - BOOLEAN
-            - FLOAT
-            - STRING
-            - COLOR
+          $ref: "#/components/schemas/VariableResolvedDataType"
         valuesByMode:
           type: object
           description: The values for each mode of this variable.
           additionalProperties:
-            x-dart-name: VariableValue
-            oneOf:
-              - type: boolean
-              - type: number
-              - type: string
-              - $ref: "#/components/schemas/RGBA"
-              - $ref: "#/components/schemas/VariableAlias"
+            $ref: "#/components/schemas/VariableData"
         remote:
           type: boolean
           description: Whether this variable is remote.
@@ -8006,13 +7995,7 @@ components:
           description: The variable collection that will contain the variable. You can use
             the temporary id of a variable collection.
         resolvedType:
-          type: string
-          description: The resolved type of the variable.
-          enum:
-            - BOOLEAN
-            - FLOAT
-            - STRING
-            - COLOR
+          $ref: "#/components/schemas/VariableResolvedDataType"
         description:
           type: string
           description: The description of this variable.
@@ -8723,9 +8706,8 @@ components:
                 type: object
                 description: A map from node IDs to URLs of the rendered images.
                 additionalProperties:
-                  type:
-                    - string
-                    - "null"
+                  type: string
+                  nullable: true
                   description: A URL to the requested image.
                   format: uri
             required:
@@ -9414,7 +9396,7 @@ components:
                 description: For successful requests, this value is always `false`.
               meta:
                 type: object
-                x-dart-name: LocalVariablesMeta
+                x-dart-type: LocalVariablesMeta
                 properties:
                   variables:
                     type: object
@@ -9535,19 +9517,19 @@ components:
                   type: object
                   properties:
                     file_key:
-                      type:
-                        - string
-                        - "null"
+                      type: string
+                      nullable: true
                       description: The file key.
                     node_id:
-                      type:
-                        - string
-                        - "null"
+                      type: string
+                      nullable: true
                       description: The node id.
                     error:
                       type: string
                       description: The error message.
                   required:
+                    - file_key
+                    - node_id
                     - error
             required:
               - links_created
