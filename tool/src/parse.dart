@@ -145,11 +145,14 @@ class DefinitionContext {
         '(alias ${alias.referenceName})',
       );
 
-      return TypeAliasDefinition(
+      final aliasDefinition = TypeAliasDefinition(
         context: this,
         name: definition.dartType(name),
         alias: alias,
       );
+
+      _storeTypeDefinition(name, aliasDefinition);
+      return aliasDefinition;
     }
 
     if (definition.hasDiscriminator) {

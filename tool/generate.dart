@@ -11,6 +11,24 @@ import 'src/preprocess.dart';
 import 'src/reference.dart';
 import 'src/spec.dart';
 
+const List<String> _allowList = <String>[
+  'LocalVariable',
+  'LocalVariableCollection',
+  'LocalVariablesResponse',
+  'LocalVariablesMeta',
+  'VariableResolvedDataType',
+  'VariableScope',
+  'VariableCodeSyntax',
+  'VariableData',
+  'VariableDataType',
+  'VariableDataValue',
+  'Mode',
+  'Rgba',
+  'Rgb',
+];
+
+bool allowed(TypeDefinition definition) => _allowList.contains(definition.name);
+
 final _formatter = DartFormatter(
   languageVersion: DartFormatter.latestLanguageVersion,
 );
@@ -49,10 +67,16 @@ Future<void> main() async {
   final definitions = parseSchemaDefinitions(document);
 
   for (final definition in definitions) {
-    final library = schemaLibrary(definition);
-    final path = 'lib/src/models/${definition.dartFile}';
+    if (allowed(definition)) {
+      final library = schemaLibrary(definition);
+      final path = 'lib/src/models/${definition.dartFile}';
 
-    print('writing $path');
-    await writeLibrary(path, library);
+      print('writing $path');
+      await writeLibrary(path, library);
+    } else {
+      print('ignoring [${definition.name}] ${allowed(definition)}');
+    }
   }
+
+  print(_allowList);
 }
