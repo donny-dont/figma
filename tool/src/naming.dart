@@ -1,3 +1,4 @@
+/*
 import 'package:change_case/change_case.dart';
 
 import 'schema.dart';
@@ -8,14 +9,12 @@ extension SchemaNaming on Schema {
 }
 
 extension PropertyNaming on Property {
-  String get dartName =>
-      metadata['x-dart-name'] as String? ?? name.toCamelCase();
+  String get dartName => name.toCamelCase();
 }
 
 extension EnumNaming on Enum {
   Iterable<MapEntry<Object, String>> get dartValues sync* {
     final meta = metadata['x-dart-enum-values'] as List?;
-    //print('$name $meta $values');
 
     final dartValues =
         (meta != null
@@ -29,3 +28,4 @@ extension EnumNaming on Enum {
     }
   }
 }
+*/

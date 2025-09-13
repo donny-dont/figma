@@ -1,42 +1,97 @@
 import 'package:change_case/change_case.dart';
-import 'package:code_builder/code_builder.dart';
+import 'package:code_builder/code_builder.dart' as code;
+import 'package:collection/collection.dart';
 
-TypeReference _type(String symbol, {bool isNullable = false, String? url}) =>
-    TypeReference(
-      (t) => t
-        ..symbol = symbol
-        ..isNullable = isNullable
-        ..url = url,
-    );
+import 'naming.dart';
+import 'parse.dart';
+import 'schema.dart';
 
-final TypeReference string = _type('String');
+code.TypeReference _type(
+  String symbol, {
+  bool isNullable = false,
+  String? url,
+}) => code.TypeReference(
+  (t) => t
+    ..symbol = symbol
+    ..isNullable = isNullable
+    ..url = url,
+);
 
-final TypeReference object = _type('Object');
+final code.TypeReference string = _type('String');
 
-final TypeReference objectNullable = _type('Object', isNullable: true);
+final code.TypeReference object = _type('Object');
 
-final TypeReference json = map(string, objectNullable);
+final code.TypeReference objectNullable = _type('Object', isNullable: true);
 
-final TypeReference equatable = _type(
+final code.TypeReference json = map(string, objectNullable);
+
+final code.TypeReference equatable = _type(
   'Equatable',
   url: 'package:equatable/equatable.dart',
 );
 
-final TypeReference props = list(objectNullable);
+final code.TypeReference props = list(objectNullable);
 
-final TypeReference node = _type('Node', url: 'node.dart');
+final code.TypeReference node = _type('Node', url: 'node.dart');
 
-TypeReference model(String name) =>
-    _type(name, url: '${name.toSnakeCase()}.dart');
+code.TypeReference map(code.Reference key, code.Reference value) =>
+    code.TypeReference(
+      (t) => t
+        ..symbol = 'Map'
+        ..types.addAll(<code.Reference>[key, value]),
+    );
 
-TypeReference map(Reference key, Reference value) => TypeReference(
-  (t) => t
-    ..symbol = 'Map'
-    ..types.addAll(<Reference>[key, value]),
-);
-
-TypeReference list(Reference value) => TypeReference(
+code.TypeReference list(code.Reference value) => code.TypeReference(
   (t) => t
     ..symbol = 'List'
     ..types.add(value),
 );
+
+code.Reference type(Type value) => value.definition.refer;
+
+extension TypeReference on TypeDefinition {
+  String get dartFileWithoutExtension => name.toSnakeCase();
+
+  String get dartFile => '$dartFileWithoutExtension.dart';
+
+  String get dartPartFile => '$dartFileWithoutExtension.g.dart';
+
+  code.Reference get refer => code.refer(name, dartFile);
+}
+
+extension PropertyReference on PropertyDefinition {
+  code.Reference get refer => code.refer(name);
+}
+
+extension EnumReference on EnumDefinition {
+  code.Expression dartValue(Object value) {
+    final enumeration = values.firstWhereOrNull((e) => e.value == value);
+    if (enumeration == null) {
+      throw ArgumentError.value(value, 'value', 'not a valid enumeration');
+    }
+
+    return refer.property(enumeration.name);
+  }
+}
+
+/*
+extension UnionReference on Union {
+  code.Reference? get dartExtends {
+    final extend = metadata['x-dart-extends'] as String?;
+    if (extend == null) {
+      return null;
+    }
+
+    return root.get(extend).refer;
+  }
+
+  Map<String, String> get dartMapping {
+    final meta = metadata['x-dart-mapping'] as Map?;
+    if (meta != null) {
+      return meta.cast<String, String>();
+    }
+
+    return mapping;
+  }
+}
+*/

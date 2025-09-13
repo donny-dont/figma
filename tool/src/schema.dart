@@ -1,11 +1,164 @@
+import 'json_map.dart';
+
+extension ReferenceSchema on JsonMap {
+  static const String _ref = r'$ref';
+
+  /// Whether the value is a reference.
+  bool get isReference => containsKey(_ref);
+
+  /// The full reference to the type.
+  String get reference => this[_ref]! as String;
+
+  /// The name of the referenced type.
+  String get referenceName => reference.referenceName;
+}
+
+extension TypeSchema on JsonMap {
+  static const String _type = 'type';
+  static const String _any = 'any';
+
+  /// The type of the definition.
+  String get type => this[_type] as String? ?? _any;
+}
+
+extension ObjectSchema on JsonMap {
+  static const String _object = 'object';
+  static const String _properties = 'properties';
+  static const String _required = 'required';
+  static const String _additionalProperties = 'additionalProperties';
+
+  /// Whether the type definition is an object.
+  bool get isObject => type == _object;
+
+  /// Whether the type has properties.
+  bool get hasProperties => containsKey(_properties);
+
+  /// The properties on the object.
+  ///
+  /// Check [hasProperties] first before accessing.
+  JsonMap get properties => getMap<String, Object?>(_properties);
+
+  /// The required properties for the object.
+  ///
+  /// Check [hasProperties] first before accessing.
+  List<String> get required => getList<String>(_required);
+
+  /// Whether the object contains additional properties.
+  ///
+  /// This is used to create a Map structure.
+  bool get hasAdditionalProperties => containsKey(_additionalProperties);
+
+  /// Additional properties for the object.
+  ///
+  /// The value type for the map.
+  JsonMap get additionalProperties => this[_additionalProperties] is Map
+      ? getMap<String, Object?>(_additionalProperties)
+      : const <String, Object?>{};
+}
+
+extension AllOfSchema on JsonMap {
+  static const String _allOf = 'allOf';
+
+  /// Whether the type is `allOf`.
+  bool get isAllOf => containsKey(_allOf);
+
+  /// Retrieves the value of `allOf`.
+  ///
+  /// Check [isAllOf] first before accessing.
+  List<JsonMap> get allOf => getJsonList(_allOf);
+}
+
+extension OneOfSchema on JsonMap {
+  static const String _oneOf = 'oneOf';
+  static const String _discriminator = 'discriminator';
+
+  /// Whether the type is `oneOf`.
+  bool get isOneOf => containsKey(_oneOf);
+
+  /// Retrieves the value of `oneOf`.
+  ///
+  /// Check [isOneOf] first before accessing.
+  List<JsonMap> get oneOf => getJsonList(_oneOf);
+
+  bool get hasDiscriminator => containsKey(_discriminator);
+
+  JsonMap get discriminator => getMap<String, Object?>(_discriminator);
+}
+
+extension DiscriminatorSchema on JsonMap {
+  static const String _property = 'propertyName';
+  static const String _mapping = 'mapping';
+
+  String get property => this[_property]! as String;
+
+  Map<String, Object?> get mapping => getMap(_mapping);
+}
+
+extension EnumerationSchema on JsonMap {
+  static const String _enum = 'enum';
+
+  /// Whether the type is an enumeration.
+  bool get isEnumeration => containsKey(_enum);
+
+  /// The list of enumerations for the type.
+  ///
+  /// Check [isEnumeration] first before accessing.
+  List<Object> get enumerations => getList<Object>(_enum);
+}
+
+extension ArraySchema on JsonMap {
+  static const String _array = 'array';
+  static const String _items = 'items';
+
+  /// Whether the type definition is an array.
+  bool get isArray => type == _array;
+
+  /// Whether the value type of the array is specified.
+  bool get hasItems => containsKey(_items);
+
+  /// The value type of the array.
+  JsonMap get items => getMap<String, Object?>(_items);
+}
+
+extension PropertySchema on JsonMap {
+  static const String _nullable = 'nullable';
+  static const String _default = 'default';
+  static const String _deprecated = 'deprecated';
+
+  /// Whether the property value can be `null`.
+  ///
+  /// This is used when the property is required but could also be `null`.
+  bool get isNullable => getBool(_nullable);
+
+  /// The default value of the property if applicable.
+  Object? get defaultTo => this[_default];
+
+  /// Whether the property is deprecated.
+  bool get isDeprecated => getBool(_deprecated);
+
+  /// Whether the property defines a type.
+  ///
+  /// A property can contain the definition of a type within it. If there isn't
+  /// any need to reference the type elsewhere defining it inline is a common
+  /// convention.
+  bool get definesType =>
+      isOneOf || isAllOf || isEnumeration || (isObject && hasProperties);
+}
+
+// \TODO merge if not used!
+extension on String {
+  String get referenceName => substring(lastIndexOf('/') + 1);
+}
+
+/*
 import 'package:change_case/change_case.dart';
 
 typedef Definition = Map<String, Object?>;
 
-final RegExp nodeMatch = RegExp(r'[A-Za-z]+Node?');
-final RegExp traitMatch = RegExp(r'[A-Za-z]+Traits?');
+final RegExp _nodeMatch = RegExp(r'[A-Za-z]+Node?$');
+final RegExp _traitMatch = RegExp(r'[A-Za-z]+Traits?$');
 
-bool isMixin(String name) => traitMatch.hasMatch(name);
+bool isMixin(String name) => _traitMatch.hasMatch(name);
 
 class Schemas {
   final Map<String, Schema> _schemas = <String, Schema>{};
@@ -21,13 +174,14 @@ class Schemas {
       schema = _addUnion(name, definition);
     } else if (definition.isEnum) {
       schema = _addEnum(name, definition);
-      print('${schema.name} ${schema.metadata}');
     } else {
       schema = _addClass(name, definition);
     }
 
     _schemas[name] = schema;
   }
+
+  T? tryGet<T extends Schema>(String name) => _schemas[name] as T?;
 
   T get<T extends Schema>(String name) => _schemas[name]! as T;
 
@@ -58,6 +212,12 @@ class Schemas {
       for (final entry in discriminatorMapping.entries) {
         mapping[entry.key] = entry.value.referenceName;
       }
+
+      print('adding enum ${name.toPascalCase()}${property.toPascalCase()}');
+
+      add('${name.toPascalCase()}${property.toPascalCase()}', <String, Object?>{
+        'enum': mapping.keys.toList(),
+      });
     }
 
     return Union(
@@ -78,8 +238,8 @@ class Schemas {
   );
 
   Class _addClass(String name, Definition definition) {
-    final implements = <String>[];
-    final mixins = <String>[];
+    final implements = <Type>[];
+    final mixins = <Type>[];
     final properties = <Property>[];
 
     final definitions = definition.isAllOf
@@ -91,17 +251,30 @@ class Schemas {
         final reference = value.referenceName;
 
         if (isMixin(reference)) {
-          mixins.add(reference);
+          mixins.add(Type(root: this, name: reference));
         }
       } else if (value.isObject) {
         properties.addAll(_addProperties(value));
       }
     }
 
+    // This should come from the data
+    late final Type? extend;
+    if (_nodeMatch.hasMatch(name)) {
+      final extendType = name == 'CanvasNode' || name == 'DocumentNode'
+          ? 'Node'
+          : 'SubcanvasNode';
+
+      extend = Type(root: this, name: extendType);
+    } else {
+      extend = null;
+    }
+
     return Class(
       root: this,
       name: name,
       metadata: definition.metadata,
+      extend: extend,
       mixin: false,
       implements: implements,
       mixins: mixins,
@@ -110,7 +283,7 @@ class Schemas {
   }
 
   Class _addMixin(String name, Definition definition) {
-    final implements = <String>[];
+    final implements = <Type>[];
     final properties = <Property>[];
 
     final definitions = definition.isAllOf
@@ -119,7 +292,7 @@ class Schemas {
 
     for (final value in definitions) {
       if (value.isReference) {
-        implements.add(value.referenceName);
+        implements.add(Type(root: this, name: value.referenceName));
       } else if (value.isObject) {
         properties.addAll(_addProperties(value));
       }
@@ -151,7 +324,9 @@ class Schemas {
     Definition definition, {
     bool required = false,
   }) {
-    final type = _addType(name, definition);
+    final type = !definition.useDiscriminator
+        ? _addType(name, definition)
+        : Type(root: this, name: definition.discriminatorType);
 
     var defaultsTo = definition['default'];
     if (!required) {
@@ -165,6 +340,7 @@ class Schemas {
     return Property(
       name: name,
       type: type,
+      description: definition.description,
       metadata: definition.metadata,
       required: required,
       defaultsTo: defaultsTo,
@@ -173,13 +349,13 @@ class Schemas {
 
   Type _addType(String name, Definition definition) {
     if (definition.isReference) {
-      return Type(name: definition.referenceName);
+      return Type(root: this, name: definition.referenceName);
     }
 
     final definitionType = definition['type'];
 
     if (definitionType is List) {
-      return Type(name: definitionType[0], isNullable: true);
+      return Type(root: this, name: definitionType[0], isNullable: true);
     }
 
     if (definitionType is String) {
@@ -192,9 +368,10 @@ class Schemas {
 
           add(schemaName, definition);
 
-          return Type(name: schemaName);
+          return Type(root: this, name: schemaName);
         } else {
           return Type(
+            root: this,
             name: definitionType,
             typeArgument: definition.hasAdditionalProperties
                 ? _addType(name, definition.additionalProperties)
@@ -203,6 +380,7 @@ class Schemas {
         }
       } else if (definitionType == 'array') {
         return Type(
+          root: this,
           name: definitionType,
           typeArgument: definition.hasItems
               ? _addType(name, definition.items)
@@ -215,24 +393,25 @@ class Schemas {
 
         add(schemaName, definition);
 
-        return Type(name: schemaName);
+        return Type(root: this, name: schemaName);
       } else {
-        return Type(name: definitionType);
+        return Type(root: this, name: definitionType);
       }
     }
 
     if (definition.isOneOf) {
       if (definition.hasDartName) {
-        return Type(name: definition.dartName);
+        return Type(root: this, name: definition.dartName);
       }
 
       return Type(
+        root: this,
         name: 'any',
         isNullable: definition.oneOf.any((v) => v.containsValue('null')),
       );
     }
 
-    return Type(name: 'any', isNullable: true);
+    return Type(root: this, name: 'any', isNullable: true);
   }
 }
 
@@ -262,32 +441,34 @@ final class Class extends Schema {
     required super.name,
     super.metadata = const {},
     this.mixin = false,
-    this.extend = '',
-    this.implements = const <String>[],
-    this.mixins = const <String>[],
+    this.extend,
+    this.implements = const <Type>[],
+    this.mixins = const <Type>[],
     this.properties = const <Property>[],
   });
 
   final bool mixin;
 
-  final String extend;
+  final Type? extend;
 
-  final List<String> implements;
+  final List<Type> implements;
 
-  final List<String> mixins;
+  final List<Type> mixins;
 
   final List<Property> properties;
 
   Iterable<Property> get superProperties sync* {
-    if (extend.isNotEmpty) {
-      final extending = root.get<Class>(extend);
-      yield* extending.implementedProperties;
+    if (extend != null) {
+      final extending = root.get(extend!.name);
+      if (extending is Class) {
+        yield* extending.implementedProperties;
+      }
     }
   }
 
   Iterable<Property> get implementedProperties sync* {
-    for (final name in implements) {
-      final implementing = root.get<Class>(name);
+    for (final type in implements) {
+      final implementing = root.get<Class>(type.name);
       yield* implementing.implementedProperties;
     }
 
@@ -298,8 +479,8 @@ final class Class extends Schema {
     if (mixin) {
       yield* implementedProperties;
     } else {
-      for (final name in mixins) {
-        final mixin = root.get<Class>(name);
+      for (final type in mixins) {
+        final mixin = root.get<Class>(type.name);
         yield* mixin.mixinProperties;
       }
     }
@@ -363,13 +544,24 @@ class Property implements Annotated {
 }
 
 class Type {
-  const Type({required this.name, this.isNullable = false, this.typeArgument});
+  const Type({
+    required this.root,
+    required this.name,
+    this.isNullable = false,
+    this.typeArgument,
+  });
+
+  final Schemas root;
 
   final String name;
 
   final bool isNullable;
 
   final Type? typeArgument;
+
+  Schema? get trySchema => root.tryGet(name);
+
+  Schema get schema => root.get(name);
 }
 
 extension on String {
@@ -377,6 +569,8 @@ extension on String {
 }
 
 extension on Definition {
+  String get description => this['description'] as String? ?? '';
+
   bool get isReference => containsKey(r'$ref');
 
   String get reference => this[r'$ref']! as String;
@@ -419,6 +613,10 @@ extension on Definition {
 
   String get dartName => this['x-dart-name']! as String;
 
+  bool get useDiscriminator => containsKey('x-dart-discriminator');
+
+  String get discriminatorType => this['x-dart-discriminator']! as String;
+
   Definition get metadata => Map<String, Object?>.fromEntries(
     entries.where((e) => e.key.startsWith('x-')),
   );
@@ -450,3 +648,4 @@ extension on Definition {
     return value.cast<String, Object?>();
   }
 }
+*/
