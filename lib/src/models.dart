@@ -1,4 +1,7 @@
+export 'models/client_meta.dart';
+export 'models/comment.dart';
 export 'models/editor_type.dart';
+export 'models/emoji.dart';
 export 'models/file_meta.dart';
 export 'models/link_access.dart';
 export 'models/local_variable.dart';
@@ -8,6 +11,7 @@ export 'models/mode.dart';
 export 'models/published_variable.dart';
 export 'models/published_variable_collection.dart';
 export 'models/published_variables_meta.dart';
+export 'models/reaction.dart';
 export 'models/rgb.dart';
 export 'models/rgba.dart';
 export 'models/role.dart';
