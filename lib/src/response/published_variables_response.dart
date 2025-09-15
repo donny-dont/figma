@@ -4,23 +4,23 @@ import 'package:figma/src/models.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
 
-part 'local_variables_response.g.dart';
+part 'published_variables_response.g.dart';
 
 /// A response object containing a list of styles.
 @JsonSerializable()
 @CopyWith()
 @immutable
-class LocalVariablesResponse extends Equatable {
+class PublishedVariablesResponse extends Equatable {
   /// Status code.
   final int status;
 
   /// If the operation ended in error.
   final bool error;
 
-  /// Contains [LocalVariable] and [LocalVariableCollection].
-  final LocalVariablesMeta meta;
+  /// Contains the collection of [PublishedVariable] and [PublishedVariableCollection].
+  final PublishedVariablesMeta meta;
 
-  const LocalVariablesResponse({
+  const PublishedVariablesResponse({
     required this.status,
     required this.error,
     required this.meta,
@@ -29,8 +29,8 @@ class LocalVariablesResponse extends Equatable {
   @override
   List<Object?> get props => [status, error, meta];
 
-  factory LocalVariablesResponse.fromJson(Map<String, dynamic> json) =>
-      _$LocalVariablesResponseFromJson(json);
+  factory PublishedVariablesResponse.fromJson(Map<String, dynamic> json) =>
+      _$PublishedVariablesResponseFromJson(json);
 
-  Map<String, dynamic> toJson() => _$LocalVariablesResponseToJson(this);
+  Map<String, dynamic> toJson() => _$PublishedVariablesResponseToJson(this);
 }

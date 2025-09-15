@@ -42,6 +42,7 @@ class LocalVariable extends Equatable {
 
   final VariableResolvedDataType resolvedType;
 
+  @VariableValueMapConverter()
   final Map<String, VariableValue> valuesByMode;
 
   final bool remote;
