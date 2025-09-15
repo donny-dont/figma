@@ -1,3 +1,6 @@
+export 'models/editor_type.dart';
+export 'models/file_meta.dart';
+export 'models/link_access.dart';
 export 'models/local_variable.dart';
 export 'models/local_variable_collection.dart';
 export 'models/local_variables_meta.dart';
@@ -7,6 +10,8 @@ export 'models/published_variable_collection.dart';
 export 'models/published_variables_meta.dart';
 export 'models/rgb.dart';
 export 'models/rgba.dart';
+export 'models/role.dart';
+export 'models/user.dart';
 export 'models/variable_alias.dart';
 export 'models/variable_code_syntax.dart';
 export 'models/variable_resolved_data_type.dart';
