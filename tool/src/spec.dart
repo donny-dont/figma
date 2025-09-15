@@ -1,5 +1,6 @@
 import 'package:change_case/change_case.dart';
 import 'package:code_builder/code_builder.dart' as code;
+import 'package:path/path.dart' as p;
 
 import 'annotate.dart' as annotate;
 import 'naming.dart';
@@ -32,6 +33,15 @@ code.Library schemaLibrary(TypeDefinition value, {String? comment}) {
   return library.build();
 }
 
+code.Library exportLibrary(String path, List<String> exports) {
+  final exportFrom = p.posix.dirname(path);
+
+  code.Directive relative(String export) =>
+      code.Directive.export(p.posix.relative(export, from: exportFrom));
+
+  return code.Library((l) => l..directives.addAll(exports.map(relative)));
+}
+
 code.Spec schemaSpec(TypeDefinition value) => switch (value) {
   ClassDefinition() => classSpec(value),
   EnumDefinition() => enumSpec(value),
@@ -40,7 +50,8 @@ code.Spec schemaSpec(TypeDefinition value) => switch (value) {
 
 code.Spec classSpec(ClassDefinition value) {
   final dartName = value.name;
-  //final extend = value.extend?.schema.refer ?? reference.equatable;
+  final extend =
+      reference.equatable; //value.extend?.schema.refer ?? reference.equatable;
 
   return code.Class(
     (c) => c
@@ -50,7 +61,7 @@ code.Spec classSpec(ClassDefinition value) {
         annotate.copyWith,
         annotate.immutable,
       ])
-      //..extend = extend
+      ..extend = extend
       //..mixins.addAll(value.mixins.map((m) => m.schema.refer))
       ..constructors.addAll(<code.Constructor>[
         code.Constructor(

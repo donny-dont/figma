@@ -17,11 +17,13 @@ const List<String> _allowList = <String>[
   'LocalVariablesResponse',
   'LocalVariablesMeta',
   'VariableResolvedDataType',
+  'VariableAlias',
   'VariableScope',
   'VariableCodeSyntax',
-  'VariableData',
-  'VariableDataType',
-  'VariableDataValue',
+  //'VariableData',
+  //'VariableDataType',
+  //'VariableDataValue',
+  //'VariableValue',
   'Mode',
   'Rgba',
   'Rgb',
@@ -63,20 +65,33 @@ Future<void> main() async {
   // Modify definition
   addDiscriminators(document);
   addTypeOverrides(document);
+  addResponses(document);
 
   final definitions = parseSchemaDefinitions(document);
+  final modelExports = <String>[];
 
   for (final definition in definitions) {
+    final path = 'lib/src/models/${definition.dartFile}';
+
     if (allowed(definition)) {
       final library = schemaLibrary(definition);
-      final path = 'lib/src/models/${definition.dartFile}';
 
       print('writing $path');
       await writeLibrary(path, library);
+
+      modelExports.add(path);
     } else {
       print('ignoring [${definition.name}] ${allowed(definition)}');
+
+      if (File(path).existsSync()) {
+        modelExports.add(path);
+      }
     }
   }
+
+  final modelsLibraryPath = 'lib/src/models.dart';
+  final modelsLibrary = exportLibrary('lib/src/models.dart', modelExports);
+  await writeLibrary(modelsLibraryPath, modelsLibrary);
 
   print(_allowList);
 }

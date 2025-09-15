@@ -85,3 +85,31 @@ void addTypeOverrides(JsonMap document, {String property = 'type'}) {
     }
   }
 }
+
+const _defaultResponseTypes = <String>[
+  'GetLocalVariablesResponse',
+  'GetPublishedVariablesResponse',
+];
+
+void addResponses(
+  JsonMap document, {
+  List<String> responseTypes = _defaultResponseTypes,
+}) {
+  final schemas = document.getJsonFromPath(<String>['components', 'schemas']);
+  final responses = document.getJsonFromPath(<String>[
+    'components',
+    'responses',
+  ]);
+
+  for (final responseType in responseTypes) {
+    //final description = responseType.description;
+    final definition = responses.getJsonFromPath(<String>[responseType]);
+    final schema = definition.getJsonFromPath(<String>[
+      'content',
+      'application/json',
+      'schema',
+    ]);
+
+    schemas[responseType] = schema;
+  }
+}

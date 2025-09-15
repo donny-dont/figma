@@ -8,6 +8,7 @@ import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 
 import 'json_map.dart';
+import 'reference.dart';
 import 'schema.dart';
 import 'schema_extensions.dart';
 
@@ -287,7 +288,6 @@ class DefinitionContext {
   }) {
     _logger.finer('adding property definition associated with $name');
 
-    // TODO DEFAULTS!!!!
     late final Type type;
     final isDiscriminator = definition.isDiscriminatorType;
 
@@ -297,12 +297,26 @@ class DefinitionContext {
       type = _type(name, definition);
     }
 
+    var isNullable = false;
+    Object? defaultsTo;
+    if (!required) {
+      if (type.isList) {
+        defaultsTo = [];
+      } else if (type.isMap) {
+        defaultsTo = {};
+      } else {
+        defaultsTo = definition.defaultsTo;
+        isNullable = defaultsTo == null;
+      }
+    }
+
     return PropertyDefinition(
       name: definition.dartName(name),
       serializedName: name,
-      type: type,
+      type: isNullable ? type.nullable() : type,
       isDeprecated: deprecated,
       isDiscriminator: isDiscriminator,
+      defaultsTo: defaultsTo,
     );
   }
 
@@ -494,14 +508,22 @@ final class Type {
 
   /// Retrieve the type's definition.
   TypeDefinition get definition => context.lookup(referenceName)!;
+
+  /// Create a nullable version of the type.
+  Type nullable() => Type(
+    context: context,
+    referenceName: referenceName,
+    isNullable: true,
+    typeArgument: typeArgument,
+  );
 }
 
 extension BuiltinType on Type {
   bool get isBuiltin => _builtinTypes.contains(definition.name);
 
-  bool get isList => definition.name == 'List';
+  bool get isList => referenceName == 'array';
 
-  bool get isMap => definition.name == 'Map';
+  bool get isMap => referenceName == 'object';
 }
 
 extension on JsonMap {

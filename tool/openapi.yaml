@@ -5721,10 +5721,11 @@ components:
       type: object
       description: Contains a variable alias
       properties:
-        type:
-          type: string
-          enum:
-            - VARIABLE_ALIAS
+        # Need to modify toJson
+        #type:
+        #  type: string
+        #  enum:
+        #    - VARIABLE_ALIAS
         id:
           type: string
           description: The id of the variable that the current variable is aliased to.
@@ -6201,15 +6202,7 @@ components:
         resolvedType:
           $ref: "#/components/schemas/VariableResolvedDataType"
         value:
-          x-dart-type: VariableDataValue
-          oneOf:
-            - type: boolean
-            - type: number
-            - type: string
-            - $ref: "#/components/schemas/RGB"
-            - $ref: "#/components/schemas/RGBA"
-            - $ref: "#/components/schemas/VariableAlias"
-            - $ref: "#/components/schemas/Expression"
+          $ref: "#/components/schemas/VariableValue"
     VariableDataType:
       type: string
       description: Defines the types of data a VariableData object can hold
@@ -7713,7 +7706,7 @@ components:
           type: object
           description: The values for each mode of this variable.
           additionalProperties:
-            $ref: "#/components/schemas/VariableData"
+            $ref: "#/components/schemas/VariableValue"
         remote:
           type: boolean
           description: Whether this variable is remote.
@@ -8108,6 +8101,7 @@ components:
         - $ref: "#/components/schemas/RGB"
         - $ref: "#/components/schemas/RGBA"
         - $ref: "#/components/schemas/VariableAlias"
+        - $ref: "#/components/schemas/Expression"
     DevResource:
       type: object
       description: A dev resource in a file
@@ -9384,16 +9378,16 @@ components:
           schema:
             type: object
             properties:
-              status:
-                type: number
-                enum:
-                  - 200
-                description: The response status code.
-              error:
-                type: boolean
-                enum:
-                  - false
-                description: For successful requests, this value is always `false`.
+              #status:
+              #  type: number
+              #  enum:
+              #    - 200
+              #  description: The response status code.
+              #error:
+              #  type: boolean
+              #  enum:
+              #    - false
+              #  description: For successful requests, this value is always `false`.
               meta:
                 type: object
                 x-dart-type: LocalVariablesMeta
@@ -9422,18 +9416,19 @@ components:
           schema:
             type: object
             properties:
-              status:
-                type: number
-                enum:
-                  - 200
-                description: The response status code.
-              error:
-                type: boolean
-                enum:
-                  - false
-                description: For successful requests, this value is always `false`.
+              #status:
+              #  type: number
+              #  enum:
+              #    - 200
+              #  description: The response status code.
+              #error:
+              #  type: boolean
+              #  enum:
+              #    - false
+              #  description: For successful requests, this value is always `false`.
               meta:
                 type: object
+                x-dart-type: PublishedVariablesMeta
                 properties:
                   variables:
                     type: object

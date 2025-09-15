@@ -131,7 +131,7 @@ extension PropertySchema on JsonMap {
   bool get isNullable => getBool(_nullable);
 
   /// The default value of the property if applicable.
-  Object? get defaultTo => this[_default];
+  Object? get defaultsTo => this[_default];
 
   /// Whether the property is deprecated.
   bool get isDeprecated => getBool(_deprecated);
