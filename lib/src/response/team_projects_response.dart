@@ -12,19 +12,19 @@ part 'team_projects_response.g.dart';
 @CopyWith()
 @immutable
 class TeamProjectsResponse extends Equatable {
+  const TeamProjectsResponse({required this.name, required this.projects});
+
+  factory TeamProjectsResponse.fromJson(Map<String, dynamic> json) =>
+      _$TeamProjectsResponseFromJson(json);
+
   /// Team name.
   final String name;
 
   /// List of project of this team.
   final List<Project> projects;
 
-  const TeamProjectsResponse({required this.name, required this.projects});
-
   @override
   List<Object?> get props => [name, projects];
-
-  factory TeamProjectsResponse.fromJson(Map<String, dynamic> json) =>
-      _$TeamProjectsResponseFromJson(json);
 
   Map<String, dynamic> toJson() => _$TeamProjectsResponseToJson(this);
 }

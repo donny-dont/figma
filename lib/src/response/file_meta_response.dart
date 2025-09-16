@@ -12,16 +12,16 @@ part 'file_meta_response.g.dart';
 @CopyWith()
 @immutable
 class FileMetaResponse extends Equatable {
-  /// The file's metadata.
-  final FileMeta file;
-
   const FileMetaResponse({required this.file});
-
-  @override
-  List<Object?> get props => [file];
 
   factory FileMetaResponse.fromJson(Map<String, dynamic> json) =>
       _$FileMetaResponseFromJson(json);
+
+  /// The file's metadata.
+  final FileMeta file;
+
+  @override
+  List<Object?> get props => [file];
 
   Map<String, dynamic> toJson() => _$FileMetaResponseToJson(this);
 }

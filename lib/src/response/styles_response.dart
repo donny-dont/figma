@@ -12,6 +12,15 @@ part 'styles_response.g.dart';
 @CopyWith()
 @immutable
 class StylesResponse extends Equatable {
+  const StylesResponse({
+    required this.status,
+    required this.error,
+    required this.meta,
+  });
+
+  factory StylesResponse.fromJson(Map<String, dynamic> json) =>
+      _$StylesResponseFromJson(json);
+
   /// Status code.
   final int status;
 
@@ -21,13 +30,8 @@ class StylesResponse extends Equatable {
   /// [Style] list + metadata.
   final StylesMeta meta;
 
-  const StylesResponse({required this.status, required this.error, required this.meta});
-
   @override
   List<Object?> get props => [status, error, meta];
-
-  factory StylesResponse.fromJson(Map<String, dynamic> json) =>
-      _$StylesResponseFromJson(json);
 
   Map<String, dynamic> toJson() => _$StylesResponseToJson(this);
 }

@@ -1,6 +1,7 @@
 export 'response/comments_response.dart';
 export 'response/file_meta_response.dart';
 export 'response/local_variables_response.dart';
+export 'response/post_comment.dart';
 export 'response/project_files_response.dart';
 export 'response/published_variables_response.dart';
 export 'response/style_response.dart';

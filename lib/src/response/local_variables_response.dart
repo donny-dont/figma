@@ -12,6 +12,15 @@ part 'local_variables_response.g.dart';
 @CopyWith()
 @immutable
 class LocalVariablesResponse extends Equatable {
+  const LocalVariablesResponse({
+    required this.status,
+    required this.error,
+    required this.meta,
+  });
+
+  factory LocalVariablesResponse.fromJson(Map<String, dynamic> json) =>
+      _$LocalVariablesResponseFromJson(json);
+
   /// Status code.
   final int status;
 
@@ -21,17 +30,8 @@ class LocalVariablesResponse extends Equatable {
   /// Contains [LocalVariable] and [LocalVariableCollection].
   final LocalVariablesMeta meta;
 
-  const LocalVariablesResponse({
-    required this.status,
-    required this.error,
-    required this.meta,
-  });
-
   @override
   List<Object?> get props => [status, error, meta];
-
-  factory LocalVariablesResponse.fromJson(Map<String, dynamic> json) =>
-      _$LocalVariablesResponseFromJson(json);
 
   Map<String, dynamic> toJson() => _$LocalVariablesResponseToJson(this);
 }

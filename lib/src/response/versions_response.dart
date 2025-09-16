@@ -12,18 +12,18 @@ part 'versions_response.g.dart';
 @CopyWith()
 @immutable
 class VersionsResponse extends Equatable {
+  const VersionsResponse({required this.versions, required this.pagination});
+
+  factory VersionsResponse.fromJson(Map<String, dynamic> json) =>
+      _$VersionsResponseFromJson(json);
+
   /// List of versions.
   final List<Version> versions;
 
   final ResponsePagination pagination;
 
-  const VersionsResponse({required this.versions, required this.pagination});
-
   @override
   List<Object?> get props => [versions];
-
-  factory VersionsResponse.fromJson(Map<String, dynamic> json) =>
-      _$VersionsResponseFromJson(json);
 
   Map<String, dynamic> toJson() => _$VersionsResponseToJson(this);
 }

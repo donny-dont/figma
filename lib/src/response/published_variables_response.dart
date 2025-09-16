@@ -12,26 +12,27 @@ part 'published_variables_response.g.dart';
 @CopyWith()
 @immutable
 class PublishedVariablesResponse extends Equatable {
-  /// Status code.
-  final int status;
-
-  /// If the operation ended in error.
-  final bool error;
-
-  /// Contains the collection of [PublishedVariable] and [PublishedVariableCollection].
-  final PublishedVariablesMeta meta;
-
   const PublishedVariablesResponse({
     required this.status,
     required this.error,
     required this.meta,
   });
 
-  @override
-  List<Object?> get props => [status, error, meta];
-
   factory PublishedVariablesResponse.fromJson(Map<String, dynamic> json) =>
       _$PublishedVariablesResponseFromJson(json);
+
+  /// Status code.
+  final int status;
+
+  /// If the operation ended in error.
+  final bool error;
+
+  /// Contains the collection of [PublishedVariable] and
+  /// [PublishedVariableCollection].
+  final PublishedVariablesMeta meta;
+
+  @override
+  List<Object?> get props => [status, error, meta];
 
   Map<String, dynamic> toJson() => _$PublishedVariablesResponseToJson(this);
 }

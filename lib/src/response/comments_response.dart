@@ -12,16 +12,16 @@ part 'comments_response.g.dart';
 @CopyWith()
 @immutable
 class CommentsResponse extends Equatable {
-  /// List of comments requested, if any.
-  final List<Comment> comments;
-
   const CommentsResponse({required this.comments});
-
-  @override
-  List<Object?> get props => [comments];
 
   factory CommentsResponse.fromJson(Map<String, dynamic> json) =>
       _$CommentsResponseFromJson(json);
+
+  /// List of comments requested, if any.
+  final List<Comment> comments;
+
+  @override
+  List<Object?> get props => [comments];
 
   Map<String, dynamic> toJson() => _$CommentsResponseToJson(this);
 }
