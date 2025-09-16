@@ -11,6 +11,7 @@ export 'models/local_variable.dart';
 export 'models/local_variable_collection.dart';
 export 'models/local_variables_meta.dart';
 export 'models/mode.dart';
+export 'models/project.dart';
 export 'models/published_style.dart';
 export 'models/published_variable.dart';
 export 'models/published_variable_collection.dart';
