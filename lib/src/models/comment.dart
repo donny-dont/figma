@@ -31,6 +31,7 @@ class Comment extends Equatable {
 
   final String id;
 
+  @ClientMetaNullableConverter()
   @JsonKey(name: 'client_meta')
   final ClientMeta? clientMeta;
 
