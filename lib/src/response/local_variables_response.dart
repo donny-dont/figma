@@ -8,7 +8,7 @@ import '../models.dart';
 part 'local_variables_response.g.dart';
 
 /// A response object containing a list of styles.
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 @CopyWith()
 @immutable
 class LocalVariablesResponse extends Equatable {
