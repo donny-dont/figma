@@ -6418,6 +6418,7 @@ components:
           type: string
           description: Unique identifier for comment.
         client_meta:
+          nullable: true
           description: Positioning information of the comment. Includes information on the
             location of the comment pin, which is either the absolute
             coordinates on the canvas or a relative offset within a frame. If
@@ -7803,11 +7804,7 @@ components:
         resolvedDataType:
           type: string
           description: The resolved type of the variable.
-          enum:
-            - BOOLEAN
-            - FLOAT
-            - STRING
-            - COLOR
+          $ref: "#/components/schemas/VariableResolvedDataType"
         updatedAt:
           type: string
           format: date-time
@@ -8746,6 +8743,7 @@ components:
         application/json:
           schema:
             type: object
+            x-dart-type: FileMeta
             properties:
               name:
                 type: string
@@ -9170,16 +9168,16 @@ components:
           schema:
             type: object
             properties:
-              status:
-                type: number
-                description: The status of the request.
-                enum:
-                  - 200
-              error:
-                type: boolean
-                description: For successful requests, this value is always `false`.
-                enum:
-                  - false
+              #status:
+              #  type: number
+              #  description: The status of the request.
+              #  enum:
+              #    - 200
+              #error:
+              #  type: boolean
+              #  description: For successful requests, this value is always `false`.
+              #  enum:
+              #    - false
               meta:
                 type: object
                 properties:
@@ -9202,18 +9200,19 @@ components:
           schema:
             type: object
             properties:
-              status:
-                type: number
-                description: The status of the request.
-                enum:
-                  - 200
-              error:
-                type: boolean
-                description: For successful requests, this value is always `false`.
-                enum:
-                  - false
+              #status:
+              #  type: number
+              #  description: The status of the request.
+              #  enum:
+              #    - 200
+              #error:
+              #  type: boolean
+              #  description: For successful requests, this value is always `false`.
+              #  enum:
+              #    - false
               meta:
                 type: object
+                x-dart-type: StylesMeta
                 properties:
                   styles:
                     type: array

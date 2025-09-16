@@ -14,7 +14,7 @@ import 'src/spec.dart';
 const List<String> _allowList = <String>[
   'LocalVariable',
   'LocalVariableCollection',
-  'LocalVariablesResponse',
+  //'LocalVariablesResponse',
   'LocalVariablesMeta',
   'VariableResolvedDataType',
   'VariableAlias',
@@ -24,9 +24,34 @@ const List<String> _allowList = <String>[
   //'VariableDataType',
   //'VariableDataValue',
   //'VariableValue',
+  //'PublishedVariablesResponse',
+  'PublishedVariablesMeta',
+  'PublishedVariable',
+  'PublishedVariableCollection',
   'Mode',
   'Rgba',
   'Rgb',
+
+  'FileMeta',
+  'User',
+  'EditorType',
+  'Role',
+  'LinkAccess',
+
+  'Comment',
+  //'ClientMeta',
+  'Reaction',
+  'Emoji',
+
+  'Vector',
+  'FrameOffset',
+  'Region',
+  'FrameOffsetRegion',
+  'CommentPinCorner',
+
+  'StylesMeta',
+  'PublishedStyle',
+  'StyleType',
 ];
 
 bool allowed(TypeDefinition definition) => _allowList.contains(definition.name);

@@ -120,6 +120,19 @@ extension ArraySchema on JsonMap {
   JsonMap get items => getMap<String, Object?>(_items);
 }
 
+extension StringSchema on JsonMap {
+  static const String _string = 'string';
+  static const String _format = 'format';
+  static const String _dateTime = 'date-time';
+  static const String _uri = 'uri';
+
+  bool get isString => type == _string;
+
+  bool get isDateTime => this[_format] == _dateTime;
+
+  bool get isUri => this[_format] == _uri;
+}
+
 extension PropertySchema on JsonMap {
   static const String _nullable = 'nullable';
   static const String _default = 'default';

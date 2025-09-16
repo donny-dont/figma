@@ -89,6 +89,8 @@ void addTypeOverrides(JsonMap document, {String property = 'type'}) {
 const _defaultResponseTypes = <String>[
   'GetLocalVariablesResponse',
   'GetPublishedVariablesResponse',
+  'GetFileMetaResponse',
+  'GetFileStylesResponse',
 ];
 
 void addResponses(

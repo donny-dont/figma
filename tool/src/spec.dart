@@ -27,7 +27,7 @@ code.Library schemaLibrary(TypeDefinition value, {String? comment}) {
     ..generatedByComment = comment;
 
   if (spec is code.Class && !spec.mixin) {
-    library.directives.add(code.Directive.part(value.dartPartFile));
+    library.directives.add(code.Directive.part(value.dartPartFile!));
   }
 
   return library.build();
@@ -136,17 +136,14 @@ final _ClassConstructorMapper _constructorSuperParameterSpec =
 
 _ClassConstructorMapper _constructorParameterSpec({required bool toSuper}) =>
     (value) {
-      final defaultTo = value.defaultsTo;
+      final defaultsTo = value.defaultsTo;
       final type = value.type;
 
       late final code.Code? defaultToCode;
       late final bool required;
 
-      if (defaultTo != null) {
-        final expression = type.isBuiltin
-            ? _constructorParameterLiteralToCode(defaultTo)
-            : _constructorParameterSchemaToCode(type.definition, defaultTo);
-        defaultToCode = expression.code;
+      if (defaultsTo != null) {
+        defaultToCode = _propertyValue(type, defaultsTo).code;
         required = false;
       } else {
         defaultToCode = null;
@@ -164,14 +161,17 @@ _ClassConstructorMapper _constructorParameterSpec({required bool toSuper}) =>
       );
     };
 
-code.Expression _constructorParameterLiteralToCode(Object value) =>
-    switch (value) {
-      List() => code.literalConstList(value),
-      Map() => code.literalConstMap(value),
-      _ => code.literal(value),
-    };
+code.Expression _propertyValue(Type type, Object value) => type.isBuiltin
+    ? _propertyValueLiteralToCode(value)
+    : _propertyValueSchemaToCode(type.definition, value);
 
-code.Expression _constructorParameterSchemaToCode(
+code.Expression _propertyValueLiteralToCode(Object value) => switch (value) {
+  List() => code.literalConstList(value),
+  Map() => code.literalConstMap(value),
+  _ => code.literal(value),
+};
+
+code.Expression _propertyValueSchemaToCode(
   TypeDefinition schema,
   Object value,
 ) => switch (schema) {
@@ -202,7 +202,7 @@ _ClassFieldMapper _fieldPropertySpec({
 
   final defaultsTo = value.defaultsTo;
   if (defaultsTo != null) {
-    arguments['defaultValue'] = code.literal(defaultsTo);
+    arguments['defaultValue'] = _propertyValue(value.type, defaultsTo);
   }
 
   final docs = !annotateWith.contains(annotate.override)
@@ -254,7 +254,7 @@ code.EnumValue _enumValue(EnumValueDefinition value) => code.EnumValue(
 code.Spec typeAliasSpec(TypeAliasDefinition value) => code.TypeDef(
   (t) => t
     ..name = value.name
-    ..definition = reference.object,
+    ..definition = value.alias.definition.refer,
 );
 
 /*

@@ -2,9 +2,7 @@ import 'package:change_case/change_case.dart';
 import 'package:code_builder/code_builder.dart' as code;
 import 'package:collection/collection.dart';
 
-import 'naming.dart';
 import 'parse.dart';
-import 'schema.dart';
 
 code.TypeReference _type(
   String symbol, {
@@ -50,11 +48,26 @@ code.TypeReference list(code.Reference value) => code.TypeReference(
 code.Reference type(Type value) => value.definition.refer;
 
 extension TypeReference on TypeDefinition {
-  String get dartFileWithoutExtension => name.toSnakeCase();
+  String? get dartFileWithoutExtension =>
+      !this.type.isBuiltin ? name.toSnakeCase() : null;
 
-  String get dartFile => '$dartFileWithoutExtension.dart';
+  String? get dartFile {
+    final base = dartFileWithoutExtension;
+    if (base == null) {
+      return null;
+    }
 
-  String get dartPartFile => '$dartFileWithoutExtension.g.dart';
+    return '$base.dart';
+  }
+
+  String? get dartPartFile {
+    final base = dartFileWithoutExtension;
+    if (base == null) {
+      return null;
+    }
+
+    return '$base.g.dart';
+  }
 
   code.Reference get refer => code.refer(name, dartFile);
 }

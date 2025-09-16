@@ -3,6 +3,7 @@
 library;
 
 import 'package:change_case/change_case.dart';
+import 'package:code_builder/code_builder.dart';
 import 'package:collection/collection.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
@@ -13,13 +14,15 @@ import 'schema.dart';
 import 'schema_extensions.dart';
 
 const List<String> _builtinTypes = [
-  'bool',
-  'num',
-  'int',
-  'String',
+  'DateTime',
   'List',
   'Map',
   'Object',
+  'String',
+  'Uri',
+  'bool',
+  'int',
+  'num',
 ];
 
 @internal
@@ -59,6 +62,9 @@ class DefinitionContext {
     final object = ClassDefinition(context: this, name: 'Object');
     _definitions['any'] = object;
     _definitions['Object'] = object;
+
+    _definitions['DateTime'] = ClassDefinition(context: this, name: 'DateTime');
+    _definitions['Uri'] = ClassDefinition(context: this, name: 'Uri');
   }
 
   /// Get all the types defined in the context.
@@ -133,12 +139,8 @@ class DefinitionContext {
   }
 
   TypeDefinition _oneOf(String name, JsonMap definition) {
-    final oneOf = definition.oneOf;
-
-    // Assuming if any value is not a reference type then its a union
-    final isUnion = oneOf.firstWhereOrNull((v) => !v.isReference) != null;
-
-    if (isUnion) {
+    // If there's no discriminator treat it as a type union
+    if (!definition.hasDiscriminator) {
       final alias = Type.object(context: this);
 
       _logger.fine(
@@ -156,29 +158,24 @@ class DefinitionContext {
       return aliasDefinition;
     }
 
-    if (definition.hasDiscriminator) {
-      final discriminator = definition.discriminator;
-      final enumerationValues = discriminator.mapping.keys.toList();
-      final enumerationNames = discriminator.hasEnumerationNames
-          ? definition.enumerationNames
-          : enumerationValues
-                .cast<String>()
-                .map((v) => v.toCamelCase())
-                .toList();
-      final property = discriminator.property;
+    // Add enumeration for the discriminator
+    final discriminator = definition.discriminator;
+    final enumerationValues = discriminator.mapping.keys.toList();
+    final enumerationNames = discriminator.hasEnumerationNames
+        ? definition.enumerationNames
+        : enumerationValues.cast<String>().map((v) => v.toCamelCase()).toList();
+    final property = discriminator.property;
 
-      final enumerationName =
-          '${name.toPascalCase()}${property.toPascalCase()}';
+    final enumerationName = '${name.toPascalCase()}${property.toPascalCase()}';
 
-      _storeTypeDefinition(
-        enumerationName,
-        EnumDefinition(
-          context: this,
-          name: enumerationName,
-          values: _enumValues(enumerationNames, enumerationValues),
-        ),
-      );
-    }
+    _storeTypeDefinition(
+      enumerationName,
+      EnumDefinition(
+        context: this,
+        name: enumerationName,
+        values: _enumValues(enumerationNames, enumerationValues),
+      ),
+    );
 
     return ClassDefinition(context: this, name: name);
   }
@@ -322,14 +319,12 @@ class DefinitionContext {
 
   Type _type(String name, JsonMap definition) {
     late final String referenceName;
-    late Type? typeArgument;
+    Type? typeArgument;
 
     if (definition.isReference) {
       referenceName = definition.referenceName;
-      typeArgument = null;
     } else if (definition.definesType) {
       referenceName = definition.dartType(name);
-      typeArgument = null;
 
       _logger.finer('found embedded type in $name property ($referenceName)');
       add(referenceName, definition);
@@ -341,9 +336,12 @@ class DefinitionContext {
     } else if (definition.isArray) {
       referenceName = definition.type;
       typeArgument = definition.hasItems ? _type(name, definition.items) : null;
+    } else if (definition.isDateTime) {
+      referenceName = 'DateTime';
+    } else if (definition.isUri) {
+      referenceName = 'Uri';
     } else {
       referenceName = definition.type;
-      typeArgument = null;
     }
 
     return Type(
