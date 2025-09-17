@@ -7,7 +7,9 @@ part of 'versions_response.dart';
 // **************************************************************************
 
 abstract class _$VersionsResponseCWProxy {
-  VersionsResponse versions(List<Version>? versions);
+  VersionsResponse versions(List<Version> versions);
+
+  VersionsResponse pagination(ResponsePagination pagination);
 
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `VersionsResponse(...).copyWith.fieldName(value)`.
@@ -16,7 +18,10 @@ abstract class _$VersionsResponseCWProxy {
   /// ```dart
   /// VersionsResponse(...).copyWith(id: 12, name: "My name")
   /// ```
-  VersionsResponse call({List<Version>? versions});
+  VersionsResponse call({
+    List<Version> versions,
+    ResponsePagination pagination,
+  });
 }
 
 /// Callable proxy for `copyWith` functionality.
@@ -27,8 +32,11 @@ class _$VersionsResponseCWProxyImpl implements _$VersionsResponseCWProxy {
   final VersionsResponse _value;
 
   @override
-  VersionsResponse versions(List<Version>? versions) =>
-      call(versions: versions);
+  VersionsResponse versions(List<Version> versions) => call(versions: versions);
+
+  @override
+  VersionsResponse pagination(ResponsePagination pagination) =>
+      call(pagination: pagination);
 
   @override
   /// Creates a new instance with the provided field values.
@@ -38,12 +46,20 @@ class _$VersionsResponseCWProxyImpl implements _$VersionsResponseCWProxy {
   /// ```dart
   /// VersionsResponse(...).copyWith(id: 12, name: "My name")
   /// ```
-  VersionsResponse call({Object? versions = const $CopyWithPlaceholder()}) {
+  VersionsResponse call({
+    Object? versions = const $CopyWithPlaceholder(),
+    Object? pagination = const $CopyWithPlaceholder(),
+  }) {
     return VersionsResponse(
-      versions: versions == const $CopyWithPlaceholder()
+      versions: versions == const $CopyWithPlaceholder() || versions == null
           ? _value.versions
           // ignore: cast_nullable_to_non_nullable
-          : versions as List<Version>?,
+          : versions as List<Version>,
+      pagination:
+          pagination == const $CopyWithPlaceholder() || pagination == null
+          ? _value.pagination
+          // ignore: cast_nullable_to_non_nullable
+          : pagination as ResponsePagination,
     );
   }
 }
@@ -61,10 +77,16 @@ extension $VersionsResponseCopyWith on VersionsResponse {
 
 VersionsResponse _$VersionsResponseFromJson(Map<String, dynamic> json) =>
     VersionsResponse(
-      versions: (json['versions'] as List<dynamic>?)
-          ?.map((e) => Version.fromJson(e as Map<String, dynamic>))
+      versions: (json['versions'] as List<dynamic>)
+          .map((e) => Version.fromJson(e as Map<String, dynamic>))
           .toList(),
+      pagination: ResponsePagination.fromJson(
+        json['pagination'] as Map<String, dynamic>,
+      ),
     );
 
 Map<String, dynamic> _$VersionsResponseToJson(VersionsResponse instance) =>
-    <String, dynamic>{'versions': instance.versions};
+    <String, dynamic>{
+      'versions': instance.versions,
+      'pagination': instance.pagination,
+    };

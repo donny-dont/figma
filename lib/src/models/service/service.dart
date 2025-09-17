@@ -12,4 +12,3 @@ export 'style_response.dart';
 export 'styles_meta.dart';
 export 'styles_response.dart';
 export 'team_projects_response.dart';
-export 'versions_response.dart';
