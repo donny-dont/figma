@@ -50,9 +50,7 @@ void main() {
 
     const basicQuery = FigmaQuery(ids: [assets]);
 
-    final testComment = PostComment(
-      message: 'Hello from Dart! 🎯',
-    );
+    final testComment = PostComment(message: 'Hello from Dart! 🎯');
 
     test(
       'getFile() retrieves file',
@@ -90,13 +88,16 @@ void main() {
     );
 
     test(
-        'postComment() posts comment',
-        () => client
-            .postComment(testFile, testComment)
-            .then((comment) => testCommentId = comment.id));
+      'postComment() posts comment',
+      () => client
+          .postComment(testFile, testComment)
+          .then((comment) => testCommentId = comment.id),
+    );
 
-    test('deleteComment() deletes comment',
-        () => client.deleteComment(testFile, testCommentId));
+    test(
+      'deleteComment() deletes comment',
+      () => client.deleteComment(testFile, testCommentId),
+    );
 
     test(
       'getMe() gets me',
