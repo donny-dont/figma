@@ -87,3 +87,10 @@ extension OverrideMapping on JsonMap {
     putOrRemoveMap(_key, value);
   }
 }
+
+extension OneOfProperties on JsonMap {
+  static const String _key = 'x-dart-object';
+
+  JsonMap get dartObject => getJson(_key);
+  set dartObject(JsonMap value) => this[_key] = value;
+}

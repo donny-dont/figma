@@ -1,11 +1,29 @@
 import 'package:change_case/change_case.dart';
 import 'package:code_builder/code_builder.dart' as code;
+import 'package:collection/collection.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:path/path.dart' as p;
 
 import 'annotate.dart' as annotate;
 import 'naming.dart';
 import 'parse.dart';
 import 'reference.dart' as reference;
+import 'hierarchy.dart';
+
+final RegExp _traitMatch = RegExp(r'[A-Za-z]+Traits?$');
+
+bool isMixin(TypeDefinition definition) =>
+    _traitMatch.hasMatch(definition.name);
+
+extension FinalType on Type {
+  TypeDefinition get finalDefinition {
+    final intermediary = definition;
+
+    return intermediary is TypeAliasDefinition
+        ? intermediary.alias.finalDefinition
+        : intermediary;
+  }
+}
 
 extension on String {
   Iterable<String> get toDocumentation {
@@ -49,20 +67,34 @@ code.Spec schemaSpec(TypeDefinition value) => switch (value) {
 };
 
 code.Spec classSpec(ClassDefinition value) {
+  ClassHierarchy.mixinCheck = isMixin;
+
   final dartName = value.name;
-  final extend =
-      reference.equatable; //value.extend?.schema.refer ?? reference.equatable;
+  final extend = value.extendReference ?? reference.equatable;
+
+  final jsonSerializableArguments = <String, code.Expression>{};
+  final explicitToJson =
+      value.properties.firstWhereOrNull((p) => !p.type.isFullyBuiltin) != null;
+
+  if (explicitToJson) {
+    jsonSerializableArguments['explicitToJson'] = code.literalTrue;
+  }
+
+  final discriminator = value.discriminator;
+  final hasDiscriminator = discriminator != null;
 
   return code.Class(
     (c) => c
       ..name = dartName
       ..annotations.addAll(<code.Expression>[
-        annotate.jsonSerializable,
+        annotate.jsonSerializable(jsonSerializableArguments),
         annotate.copyWith,
         annotate.immutable,
       ])
+      ..docs.addAll(value.description.toDocumentation)
+      ..abstract = hasDiscriminator
       ..extend = extend
-      //..mixins.addAll(value.mixins.map((m) => m.schema.refer))
+      ..mixins.addAll(value.mixinReferences)
       ..constructors.addAll(<code.Constructor>[
         code.Constructor(
           (c) => c
@@ -71,7 +103,8 @@ code.Spec classSpec(ClassDefinition value) {
               //...value.superProperties.map(_constructorSuperParameterSpec),
               //...value.mixinProperties.map(_constructorThisParameterSpec),
               //...value.implementedProperties.map(_constructorThisParameterSpec),
-              ...value.properties.map(_constructorThisParameterSpec),
+              ...value.superFields.map(_constructorSuperParameterSpec),
+              ...value.fields.map(_constructorThisParameterSpec),
             ]),
         ),
         code.Constructor(
@@ -85,9 +118,12 @@ code.Spec classSpec(ClassDefinition value) {
                   ..name = 'json',
               ),
             )
-            ..body = code.refer('_\$${dartName}FromJson').call(
-              <code.Expression>[code.refer('json')],
-            ).code,
+            ..lambda = !hasDiscriminator
+            ..body = hasDiscriminator
+                ? _discriminatorConstructorBody(discriminator)
+                : code.refer('_\$${dartName}FromJson').call(<code.Expression>[
+                    code.refer('json'),
+                  ]).code,
         ),
       ])
       ..fields.addAll(<code.Field>[
@@ -95,6 +131,7 @@ code.Spec classSpec(ClassDefinition value) {
         ...value.properties.map(_fieldClassPropertySpec),
       ])
       ..methods.addAll(<code.Method>[
+        if (hasDiscriminator) _getterPropertySpec(discriminator),
         code.Method(
           (m) => m
             ..returns = reference.props
@@ -102,8 +139,8 @@ code.Spec classSpec(ClassDefinition value) {
             ..annotations.add(annotate.override)
             ..type = code.MethodType.getter
             ..body = code.literalList(<Object>[
-              //if (extend != reference.equatable)
-              //  code.refer('super').property('props').spread,
+              if (extend != reference.equatable)
+                code.refer('super').property('props').spread,
               //...value.mixinProperties.map(_propsReference),
               //...value.implementedProperties.map(_propsReference),
               ...value.properties.map(_propsReference),
@@ -114,7 +151,7 @@ code.Spec classSpec(ClassDefinition value) {
             ..returns = reference.json
             ..name = 'toJson'
             ..annotations.addAll(<code.Expression>[
-              //if (extend != reference.equatable) annotate.override,
+              if (extend != reference.equatable) annotate.override,
             ])
             ..body = code.refer('_\$${dartName}ToJson').call(<code.Expression>[
               code.refer('this'),
@@ -143,7 +180,7 @@ _ClassConstructorMapper _constructorParameterSpec({required bool toSuper}) =>
       late final bool required;
 
       if (defaultsTo != null) {
-        defaultToCode = _propertyValue(type, defaultsTo).code;
+        defaultToCode = _parameterDefault(type, defaultsTo).code;
         required = false;
       } else {
         defaultToCode = null;
@@ -161,17 +198,31 @@ _ClassConstructorMapper _constructorParameterSpec({required bool toSuper}) =>
       );
     };
 
-code.Expression _propertyValue(Type type, Object value) => type.isBuiltin
-    ? _propertyValueLiteralToCode(value)
-    : _propertyValueSchemaToCode(type.definition, value);
+code.Expression _jsonAnnotationDefault(Type type, Object value) =>
+    type.isBuiltin
+    ? code.literal(value)
+    : _jsonAnnotationDefaultValueSchemaToCode(type.definition, value);
 
-code.Expression _propertyValueLiteralToCode(Object value) => switch (value) {
+code.Expression _jsonAnnotationDefaultValueSchemaToCode(
+  TypeDefinition schema,
+  Object value,
+) => switch (schema) {
+  EnumDefinition() => schema.dartValue(value),
+  ClassDefinition() => code.literalMap({}),
+  _ => throw ArgumentError.value(schema, 'schema', 'unsupported schema'),
+};
+
+code.Expression _parameterDefault(Type type, Object value) => type.isBuiltin
+    ? _parameterDefaultLiteralToCode(value)
+    : _parameterDefaultValueSchemaToCode(type.definition, value);
+
+code.Expression _parameterDefaultLiteralToCode(Object value) => switch (value) {
   List() => code.literalConstList(value),
   Map() => code.literalConstMap(value),
   _ => code.literal(value),
 };
 
-code.Expression _propertyValueSchemaToCode(
+code.Expression _parameterDefaultValueSchemaToCode(
   TypeDefinition schema,
   Object value,
 ) => switch (schema) {
@@ -202,7 +253,7 @@ _ClassFieldMapper _fieldPropertySpec({
 
   final defaultsTo = value.defaultsTo;
   if (defaultsTo != null) {
-    arguments['defaultValue'] = _propertyValue(value.type, defaultsTo);
+    arguments['defaultValue'] = _jsonAnnotationDefault(value.type, defaultsTo);
   }
 
   final docs = !annotateWith.contains(annotate.override)
@@ -225,6 +276,7 @@ _ClassFieldMapper _fieldPropertySpec({
 code.Class _mixinSpec(ClassDefinition value) => code.Class(
   (c) => c
     ..name = value.name
+    ..docs.addAll(value.description.toDocumentation)
     ..abstract = true
     ..mixin = true
     ..implements.addAll(value.implements.map(reference.type))
@@ -234,14 +286,15 @@ code.Class _mixinSpec(ClassDefinition value) => code.Class(
 code.Method _getterPropertySpec(PropertyDefinition value) => code.Method(
   (m) => m
     ..name = value.name
+    ..docs.addAll(value.description.toDocumentation)
     ..type = code.MethodType.getter
-    ..returns = typeSpec(value.type)
-    ..docs.addAll(value.description.toDocumentation),
+    ..returns = typeSpec(value.type),
 );
 
 code.Spec enumSpec(EnumDefinition value) => code.Enum(
   (e) => e
     ..name = value.name
+    ..docs.addAll(value.description.toDocumentation)
     ..values.addAll(value.values.map(_enumValue)),
 );
 
@@ -254,114 +307,60 @@ code.EnumValue _enumValue(EnumValueDefinition value) => code.EnumValue(
 code.Spec typeAliasSpec(TypeAliasDefinition value) => code.TypeDef(
   (t) => t
     ..name = value.name
+    ..docs.addAll(value.description.toDocumentation)
     ..definition = value.alias.definition.refer,
 );
 
-/*
-code.Spec unionSpec(Union value) {
-  final property = value.property;
-
-  if (property.isEmpty) {
-    print('unknown union ${value.name}');
-    return code.TypeDef(
-      (t) => t
-        ..name = value.name
-        ..definition = reference.object.expression,
-    );
-  }
-
-  print(value.dartMapping);
-  print(value.metadata);
-  final mapping = Map.from(value.dartMapping);
+code.Code _discriminatorConstructorBody(DiscriminatorDefinition property) {
+  final mapping = Map<String, Type>.from(property.mapping);
   final caseStatements = <code.Code>[];
 
   while (mapping.isNotEmpty) {
     final key = mapping.keys.first;
-    final typename = mapping.remove(key);
+    final mapToType = mapping.remove(key)!;
 
     final typeMappings = <String>[
       key,
-      ...mapping.entries.where((e) => e.value == typename).map((e) => e.key),
+      ...mapping.entries
+          .where((e) => e.value.name == mapToType.name)
+          .map((e) => e.key),
     ];
 
     for (final remove in typeMappings) {
       mapping.remove(remove);
     }
 
-    print(typename);
-    final type = value.root.get(typename);
-
     caseStatements.addAll(<code.Code>[
-      code.Code(typeMappings.map((v) => "'$v'").join(' || ')),
+      if (key != '_')
+        code.Code(typeMappings.map((v) => "'$v'").join(' || '))
+      else
+        code.Code('_'),
       code.Code('=>'),
-      type.refer.property('fromJson').code,
+      mapToType.definition.refer.property('fromJson').code,
       code.Code(','),
     ]);
   }
 
-  if (!value.dartMapping.containsKey('_')) {
+  final propertySerializedName = property.serializedName;
+
+  if (!property.mapping.containsKey('_')) {
     caseStatements.add(
       code.Code(
         '_ => throw ArgumentError.value(discriminator,'
-        "'$property',"
-        "'unknown $property'),",
+        "'$propertySerializedName',"
+        "'unknown $propertySerializedName'),",
       ),
     );
   }
 
-  final body = code.Block.of(<code.Code>[
-    code.Code("final discriminator = json['$property'];"),
+  return code.Block.of(<code.Code>[
+    code.Code("final discriminator = json['$propertySerializedName'];"),
     code.Code('final construct = switch (discriminator) {'),
     ...caseStatements,
     code.Code('};\n\n'),
     code.Code('return construct(json);'),
   ]);
-
-  final discriminatorType = value.root.get(
-    '${value.name.toPascalCase()}${property.toPascalCase()}',
-  );
-
-  final extend = value.dartExtends ?? reference.equatable;
-
-  return code.Class(
-    (c) => c
-      ..name = value.name
-      ..abstract = true
-      ..extend = extend
-      ..constructors.addAll(<code.Constructor>[
-        code.Constructor((c) => c..constant = true),
-        code.Constructor(
-          (c) => c
-            ..factory = true
-            ..name = 'fromJson'
-            ..requiredParameters.add(
-              code.Parameter(
-                (p) => p
-                  ..type = reference.json
-                  ..name = 'json',
-              ),
-            )
-            ..lambda = false
-            ..body = body,
-        ),
-      ])
-      ..methods.addAll(<code.Method>[
-        code.Method(
-          (m) => m
-            ..name = property.toCamelCase()
-            ..type = code.MethodType.getter
-            ..returns = discriminatorType.refer,
-        ),
-        if (extend == reference.equatable)
-          code.Method(
-            (m) => m
-              ..returns = reference.json
-              ..name = 'toJson',
-          ),
-      ]),
-  );
 }
-*/
 
 code.TypeReference typeSpec(Type value) {
   late final String? url;

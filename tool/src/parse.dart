@@ -3,13 +3,10 @@
 library;
 
 import 'package:change_case/change_case.dart';
-import 'package:code_builder/code_builder.dart';
-import 'package:collection/collection.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 
 import 'json_map.dart';
-import 'reference.dart';
 import 'schema.dart';
 import 'schema_extensions.dart';
 
@@ -133,6 +130,7 @@ class DefinitionContext {
     return ClassDefinition(
       context: this,
       name: definition.dartType(name),
+      description: definition.description,
       implements: implements,
       properties: properties,
     );
@@ -150,6 +148,7 @@ class DefinitionContext {
 
       final aliasDefinition = TypeAliasDefinition(
         context: this,
+        description: definition.description,
         name: definition.dartType(name),
         alias: alias,
       );
@@ -160,13 +159,16 @@ class DefinitionContext {
 
     // Add enumeration for the discriminator
     final discriminator = definition.discriminator;
-    final enumerationValues = discriminator.mapping.keys.toList();
+    final mapping = discriminator.mapping;
+    final enumerationValues = mapping.keys.toList();
     final enumerationNames = discriminator.hasEnumerationNames
         ? definition.enumerationNames
         : enumerationValues.cast<String>().map((v) => v.toCamelCase()).toList();
     final property = discriminator.property;
 
-    final enumerationName = '${name.toPascalCase()}${property.toPascalCase()}';
+    final enumerationName =
+        discriminator.discriminatorType ??
+        '${name.toPascalCase()}${property.toPascalCase()}';
 
     _storeTypeDefinition(
       enumerationName,
@@ -177,7 +179,26 @@ class DefinitionContext {
       ),
     );
 
-    return ClassDefinition(context: this, name: name);
+    final dartType = definition.dartType(name);
+
+    return ClassDefinition(
+      context: this,
+      name: dartType,
+      description: definition.description,
+      properties: _properties(definition.dartObject).toList(),
+      discriminator: DiscriminatorDefinition(
+        name: property.dartName,
+        description: 'Discriminator for [$dartType] types.',
+        serializedName: property,
+        type: Type(context: this, referenceName: enumerationName),
+        mapping: mapping.map(
+          (k, v) => MapEntry<String, Type>(
+            k,
+            Type(context: this, referenceName: (v! as String).referenceName),
+          ),
+        ),
+      ),
+    );
   }
 
   TypeDefinition _enum(String name, JsonMap definition) {
@@ -191,6 +212,7 @@ class DefinitionContext {
     return EnumDefinition(
       context: this,
       name: definition.dartType(name),
+      description: definition.description,
       values: _enumValues(enumerationNames, enumerationValues),
     );
   }
@@ -228,12 +250,16 @@ class DefinitionContext {
     return ClassDefinition(
       context: this,
       name: definition.dartType(name),
+      description: definition.description,
       properties: _properties(definition).toList(),
     );
   }
 
   TypeDefinition _typeAlias(String name, JsonMap definition) {
-    final alias = Type(context: this, referenceName: definition.type);
+    final referenceName = definition.isReference
+        ? definition.referenceName
+        : definition.type;
+    final alias = Type(context: this, referenceName: referenceName);
     _logger.fine(
       'adding type alias definition associated with $name '
       '(aliased to ${alias.referenceName})',
@@ -242,6 +268,7 @@ class DefinitionContext {
     return TypeAliasDefinition(
       context: this,
       name: definition.dartType(name),
+      description: definition.description,
       alias: alias,
     );
   }
@@ -252,9 +279,10 @@ class DefinitionContext {
 
     if (propertyCount == 0) {
       _logger.warning('no properties found in definition');
-    } else {
-      _logger.finer('found $propertyCount properties');
+      return;
     }
+
+    _logger.finer('found $propertyCount properties');
 
     final required = definition.required;
 
@@ -309,6 +337,7 @@ class DefinitionContext {
 
     return PropertyDefinition(
       name: definition.dartName(name),
+      description: definition.description,
       serializedName: name,
       type: isNullable ? type.nullable() : type,
       isDeprecated: deprecated,
@@ -367,12 +396,19 @@ class DefinitionContext {
 
 @immutable
 sealed class Definition {
-  const Definition();
+  const Definition({this.description = ''});
+
+  /// Description of the definition.
+  final String description;
 }
 
 @immutable
 sealed class TypeDefinition extends Definition {
-  const TypeDefinition({required this.context, required this.name});
+  const TypeDefinition({
+    super.description,
+    required this.context,
+    required this.name,
+  });
 
   @protected
   final DefinitionContext context;
@@ -387,10 +423,12 @@ sealed class TypeDefinition extends Definition {
 @immutable
 final class ClassDefinition extends TypeDefinition {
   const ClassDefinition({
+    super.description,
     required super.context,
     required super.name,
     this.implements = const <Type>[],
     this.properties = const <PropertyDefinition>[],
+    this.discriminator,
   });
 
   /// The implemented classes.
@@ -402,11 +440,14 @@ final class ClassDefinition extends TypeDefinition {
   ///
   /// Does not take into account any properties from [implements].
   final List<PropertyDefinition> properties;
+
+  final DiscriminatorDefinition? discriminator;
 }
 
 @immutable
 final class EnumDefinition extends TypeDefinition {
   const EnumDefinition({
+    super.description,
     required super.context,
     required super.name,
     required this.values,
@@ -418,7 +459,11 @@ final class EnumDefinition extends TypeDefinition {
 
 @immutable
 final class EnumValueDefinition extends Definition {
-  const EnumValueDefinition({required this.name, required this.value});
+  const EnumValueDefinition({
+    super.description,
+    required this.name,
+    required this.value,
+  });
 
   /// The associated name.
   final String name;
@@ -430,6 +475,7 @@ final class EnumValueDefinition extends Definition {
 @immutable
 final class TypeAliasDefinition extends TypeDefinition {
   const TypeAliasDefinition({
+    super.description,
     required super.context,
     required super.name,
     required this.alias,
@@ -442,10 +488,10 @@ final class TypeAliasDefinition extends TypeDefinition {
 @immutable
 final class PropertyDefinition extends Definition {
   const PropertyDefinition({
+    super.description,
     required this.name,
     required this.serializedName,
     required this.type,
-    this.description = '',
     this.isDeprecated = false,
     this.isDiscriminator = false,
     this.defaultsTo,
@@ -460,9 +506,6 @@ final class PropertyDefinition extends Definition {
   /// The type for the property.
   final Type type;
 
-  /// Description of the property.
-  final String description;
-
   /// Whether the property is deprecated.
   final bool isDeprecated;
 
@@ -471,6 +514,23 @@ final class PropertyDefinition extends Definition {
 
   /// The value the property should default to.
   final Object? defaultsTo;
+}
+
+@immutable
+final class DiscriminatorDefinition extends PropertyDefinition {
+  const DiscriminatorDefinition({
+    super.description,
+    required super.name,
+    required super.serializedName,
+    required super.type,
+    super.isDeprecated,
+    super.isDiscriminator = true,
+    super.defaultsTo,
+    required this.mapping,
+  });
+
+  /// The mapping of values to types.
+  final Map<String, Type> mapping;
 }
 
 @immutable
@@ -519,6 +579,16 @@ final class Type {
 extension BuiltinType on Type {
   bool get isBuiltin => _builtinTypes.contains(definition.name);
 
+  bool get isFullyBuiltin {
+    if (!isBuiltin) {
+      return false;
+    }
+
+    final argument = typeArgument;
+
+    return argument != null ? argument.isBuiltin : true;
+  }
+
   bool get isList => referenceName == 'array';
 
   bool get isMap => referenceName == 'object';
@@ -526,10 +596,18 @@ extension BuiltinType on Type {
 
 extension on JsonMap {
   /// A name for a type following Dart's naming conventions.
-  String dartType(String defaultTo) => typeOverride ?? defaultTo.toPascalCase();
+  String dartType(String defaultTo) => typeOverride ?? defaultTo.dartType;
 
   /// A name for a property or variable following Dart's naming conventions.
-  String dartName(String defaultTo) => nameOverride ?? defaultTo.toCamelCase();
+  String dartName(String defaultTo) => nameOverride ?? defaultTo.dartName;
+}
+
+extension on String {
+  /// A name for a type following Dart's naming conventions.
+  String get dartType => toPascalCase();
+
+  /// A name for a property or variable following Dart's naming conventions.
+  String get dartName => toCamelCase();
 }
 
 /// Parses the schema definitions found in the [root].

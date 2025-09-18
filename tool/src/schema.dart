@@ -13,6 +13,12 @@ extension ReferenceSchema on JsonMap {
   String get referenceName => reference.referenceName;
 }
 
+extension DocumentationSchema on JsonMap {
+  static const String _description = 'description';
+
+  String get description => this[_description] as String? ?? '';
+}
+
 extension TypeSchema on JsonMap {
   static const String _type = 'type';
   static const String _any = 'any';
@@ -158,8 +164,66 @@ extension PropertySchema on JsonMap {
       isOneOf || isAllOf || isEnumeration || (isObject && hasProperties);
 }
 
-// \TODO merge if not used!
-extension on String {
+extension OpenApiSchema on JsonMap {
+  static const List<String> _componentSchemasPath = <String>[
+    'components',
+    'schemas',
+  ];
+
+  static const List<String> _componentResponsesPath = <String>[
+    'components',
+    'responses',
+  ];
+
+  JsonMap get componentSchemas => getJsonFromPath(_componentSchemasPath);
+
+  JsonMap get componentResponses => getJsonFromPath(_componentResponsesPath);
+
+  JsonMap get paths => getJson('paths');
+}
+
+extension PathsSchema on JsonMap {
+  JsonMap path(String endpoint) => getJson(endpoint);
+}
+
+extension PathSchema on JsonMap {
+  static const String _post = 'post';
+  static const String _put = 'put';
+
+  bool get hasPost => containsKey(_post);
+
+  JsonMap get post => getJson(_post);
+
+  bool get hasPut => containsKey(_put);
+
+  JsonMap get put => getJson(_put);
+}
+
+extension MethodSchema on JsonMap {
+  static const String _operationId = 'operationId';
+  static const List<String> _schemaPath = <String>[
+    'requestBody',
+    'content',
+    'application/json',
+    'schema',
+  ];
+
+  String get operationId => this[_operationId]! as String;
+
+  JsonMap get requestBodySchema => getJsonFromPath(_schemaPath);
+}
+
+extension ResponseSchema on JsonMap {
+  static const List<String> _schemaPath = <String>[
+    'content',
+    'application/json',
+    'schema',
+  ];
+
+  JsonMap get responseSchema => getJsonFromPath(_schemaPath);
+}
+
+extension StringReferenceName on String {
   String get referenceName => substring(lastIndexOf('/') + 1);
 }
 

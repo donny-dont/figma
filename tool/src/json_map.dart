@@ -46,6 +46,8 @@ extension JsonMapValue on JsonMap {
     return list.map((m) => (m as Map).cast<String, Object?>()).toList();
   }
 
+  JsonMap getJson(String key) => getMap<String, Object?>(key);
+
   JsonMap getJsonFromPath(List<String> path) {
     var map = this;
 

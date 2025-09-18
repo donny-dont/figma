@@ -42,6 +42,7 @@ const List<String> _allowList = <String>[
   //'ClientMeta',
   'Reaction',
   'Emoji',
+  'PostComment',
 
   'Vector',
   'FrameOffset',
@@ -52,6 +53,59 @@ const List<String> _allowList = <String>[
   'StylesMeta',
   'PublishedStyle',
   'StyleType',
+
+  'Project',
+
+  'ProjectFile',
+
+  'Version',
+  'ResponsePagination',
+
+  'PublishedComponent',
+  'ComponentsMeta',
+  'ResponseCursor',
+  'FrameInfo',
+  'ContainingComponentSet',
+
+  'Webhook',
+  'WebhookEvent',
+  'WebhookStatus',
+  'PostWebhook',
+  'PutWebhook',
+
+  'WebhookPayload',
+  'PingPayload',
+  'FileUpdatePayload',
+  'FileDeletePayload',
+  'FileVersionUpdatePayload',
+  'LibraryPublishPayload',
+  'FileCommentPayload',
+  'DevModeStatusUpdatePayload',
+  'LibraryItemData',
+  'DevResource',
+  'CommentFragment',
+
+  //'Effect',
+  'EffectType',
+  //'ShadowEffect',
+  //'DropShadowEffect',
+  //'InnerShadowEffect',
+  'BlendMode',
+  //'ShadowEffectVariables',
+
+  'BlurEffect',
+  'BlurType',
+  'BlurEffectVariables',
+  'NormalBlurEffect',
+  'ProgressiveBlurEffect',
+/*
+  'TextureEffect',
+  'NoiseEffect',
+  'NoiseEffectNoiseType',
+  'MonotoneNoiseEffect',
+  'MultitoneNoiseEffect',
+  'DuotoneNoiseEffect',
+  */
 ];
 
 bool allowed(TypeDefinition definition) => _allowList.contains(definition.name);
@@ -90,7 +144,9 @@ Future<void> main() async {
   // Modify definition
   addDiscriminators(document);
   addTypeOverrides(document);
+  addDiscriminatorTypes(document);
   addResponses(document);
+  addRequests(document);
 
   final definitions = parseSchemaDefinitions(document);
   final modelExports = <String>[];

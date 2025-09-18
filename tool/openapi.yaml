@@ -4828,6 +4828,16 @@ components:
         - gutterSize
         - offset
         - count
+    ShadowEffect:
+      oneOf:
+        - $ref: "#/components/schemas/DropShadowEffect"
+        - $ref: "#/components/schemas/InnerShadowEffect"
+      discriminator:
+        propertyName: type
+        x-dart-discriminator: EffectType
+        mapping:
+          DROP_SHADOW: "#/components/schemas/DropShadowEffect"
+          INNER_SHADOW: "#/components/schemas/InnerShadowEffect"
     BaseShadowEffect:
       type: object
       description: Base properties shared by all shadow effects
@@ -4916,6 +4926,7 @@ components:
         - $ref: "#/components/schemas/ProgressiveBlurEffect"
       discriminator:
         propertyName: blurType
+        x-dart-discriminator: BlurType
         mapping:
           NORMAL: "#/components/schemas/NormalBlurEffect"
           PROGRESSIVE: "#/components/schemas/ProgressiveBlurEffect"
@@ -6755,6 +6766,7 @@ components:
         - user
     WebhookV2:
       type: object
+      x-dart-type: Webhook
       description: A description of an HTTP webhook (from Figma back to your application)
       properties:
         id:
@@ -6814,6 +6826,7 @@ components:
         - description
     WebhookV2Event:
       type: string
+      x-dart-type: WebhookEvent
       description: An enum representing the possible events that a webhook can subscribe to
       enum:
         - PING
@@ -6825,6 +6838,7 @@ components:
         - DEV_MODE_STATUS_UPDATE
     WebhookV2Status:
       type: string
+      x-dart-type: WebhookStatus
       description: |-
         An enum representing the possible statuses you can set a webhook to:
         - `ACTIVE`: The webhook is healthy and receive all events
@@ -6915,25 +6929,47 @@ components:
         mention:
           type: string
           description: User id that is set if a fragment refers to a user mention
+    WebhookPayload:
+      oneOf:
+        - $ref: "#/components/schemas/WebhookPingPayload"
+        - $ref: "#/components/schemas/WebhookFileUpdatePayload"
+        - $ref: "#/components/schemas/WebhookFileDeletePayload"
+        - $ref: "#/components/schemas/WebhookFileVersionUpdatePayload"
+        - $ref: "#/components/schemas/WebhookLibraryPublishPayload"
+        - $ref: "#/components/schemas/WebhookFileCommentPayload"
+        - $ref: "#/components/schemas/WebhookDevModeStatusUpdatePayload"
+      discriminator:
+        propertyName: event_type
+        x-dart-discriminator: WebhookV2Event
+        mapping:
+          PING: "#/components/schemas/WebhookPingPayload"
+          FILE_UPDATE: "#/components/schemas/WebhookFileUpdatePayload"
+          FILE_DELETE: "#/components/schemas/WebhookFileDeletePayload"
+          FILE_VERSION_UPDATE: "#/components/schemas/WebhookFileVersionUpdatePayload"
+          LIBRARY_PUBLISH: "#/components/schemas/WebhookLibraryPublishPayload"
+          FILE_COMMENT: "#/components/schemas/WebhookFileCommentPayload"
+          DEV_MODE_STATUS_UPDATE: "#/components/schemas/WebhookDevModeStatusUpdatePayload"
+      x-dart-object:
+        properties:
+          passcode:
+            type: string
+            description: The passcode specified when the webhook was created, should match
+              what was initially provided
+          timestamp:
+            type: string
+            format: date-time
+            description: UTC ISO 8601 timestamp of when the event was triggered.
+          webhook_id:
+            type: string
+            description: The id of the webhook that caused the callback
+        required:
+          - passcode
+          - timestamp
+          - webhook_id
     WebhookBasePayload:
-      type: object
-      properties:
-        passcode:
-          type: string
-          description: The passcode specified when the webhook was created, should match
-            what was initially provided
-        timestamp:
-          type: string
-          format: date-time
-          description: UTC ISO 8601 timestamp of when the event was triggered.
-        webhook_id:
-          type: string
-          description: The id of the webhook that caused the callback
-      required:
-        - passcode
-        - timestamp
-        - webhook_id
+      $ref: "#/components/schemas/WebhookPayload"
     WebhookPingPayload:
+      x-dart-type: PingPayload
       allOf:
         - $ref: "#/components/schemas/WebhookBasePayload"
         - type: object
@@ -6945,6 +6981,7 @@ components:
           required:
             - event_type
     WebhookFileUpdatePayload:
+      x-dart-type: FileUpdatePayload
       allOf:
         - $ref: "#/components/schemas/WebhookBasePayload"
         - type: object
@@ -6964,6 +7001,7 @@ components:
             - file_key
             - file_name
     WebhookFileDeletePayload:
+      x-dart-type: FileDeletePayload
       allOf:
         - $ref: "#/components/schemas/WebhookBasePayload"
         - type: object
@@ -6987,6 +7025,7 @@ components:
             - file_name
             - triggered_by
     WebhookFileVersionUpdatePayload:
+      x-dart-type: FileVersionUpdatePayload
       allOf:
         - $ref: "#/components/schemas/WebhookBasePayload"
         - type: object
@@ -7022,6 +7061,7 @@ components:
             - triggered_by
             - version_id
     WebhookLibraryPublishPayload:
+      x-dart-type: LibraryPublishPayload
       allOf:
         - $ref: "#/components/schemas/WebhookBasePayload"
         - type: object
@@ -7106,6 +7146,7 @@ components:
             - library_item
             - triggered_by
     WebhookFileCommentPayload:
+      x-dart-type: FileCommentPayload
       allOf:
         - $ref: "#/components/schemas/WebhookBasePayload"
         - type: object
@@ -7149,6 +7190,7 @@ components:
             - file_name
             - triggered_by
     WebhookDevModeStatusUpdatePayload:
+      x-dart-type: DevModeStatusUpdatePayload
       allOf:
         - $ref: "#/components/schemas/WebhookBasePayload"
         - type: object
@@ -8837,6 +8879,7 @@ components:
                 description: An array of files.
                 items:
                   type: object
+                  x-dart-type: ProjectFile
                   properties:
                     key:
                       type: string
@@ -8998,18 +9041,19 @@ components:
           schema:
             type: object
             properties:
-              status:
-                type: number
-                description: The status of the request.
-                enum:
-                  - 200
-              error:
-                type: boolean
-                description: For successful requests, this value is always `false`.
-                enum:
-                  - false
+              #status:
+              #  type: number
+              #  description: The status of the request.
+              #  enum:
+              #    - 200
+              #error:
+              #  type: boolean
+              #  description: For successful requests, this value is always `false`.
+              #  enum:
+              #    - false
               meta:
                 type: object
+                x-dart-type: ComponentsMeta
                 properties:
                   components:
                     type: array
