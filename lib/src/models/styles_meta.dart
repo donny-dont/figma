@@ -7,7 +7,7 @@ import 'published_style.dart';
 
 part 'styles_meta.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 @CopyWith()
 @immutable
 class StylesMeta extends Equatable {

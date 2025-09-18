@@ -5,6 +5,7 @@ import 'package:meta/meta.dart';
 
 part 'rgba.g.dart';
 
+/// An RGBA color
 @JsonSerializable()
 @CopyWith()
 @immutable
@@ -18,12 +19,16 @@ class Rgba extends Equatable {
 
   factory Rgba.fromJson(Map<String, Object?> json) => _$RgbaFromJson(json);
 
+  /// Red channel value, between 0 and 1.
   final num r;
 
+  /// Green channel value, between 0 and 1.
   final num g;
 
+  /// Blue channel value, between 0 and 1.
   final num b;
 
+  /// Alpha channel value, between 0 and 1.
   final num a;
 
   @override

@@ -5,6 +5,7 @@ import 'package:meta/meta.dart';
 
 part 'response_pagination.g.dart';
 
+/// If pagination is needed due to the length of the response, identifies the next and previous pages.
 @JsonSerializable()
 @CopyWith()
 @immutable
@@ -14,9 +15,11 @@ class ResponsePagination extends Equatable {
   factory ResponsePagination.fromJson(Map<String, Object?> json) =>
       _$ResponsePaginationFromJson(json);
 
+  /// A URL that calls the previous page of the response.
   @JsonKey(name: 'prev_page')
   final String? prevPage;
 
+  /// A URL that calls the next page of the response.
   @JsonKey(name: 'next_page')
   final String? nextPage;
 

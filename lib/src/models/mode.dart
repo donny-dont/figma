@@ -13,8 +13,10 @@ class Mode extends Equatable {
 
   factory Mode.fromJson(Map<String, Object?> json) => _$ModeFromJson(json);
 
+  /// The unique identifier of this mode.
   final String modeId;
 
+  /// The name of this mode.
   final String name;
 
   @override

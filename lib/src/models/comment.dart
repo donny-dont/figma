@@ -9,7 +9,8 @@ import 'user.dart';
 
 part 'comment.g.dart';
 
-@JsonSerializable()
+/// A comment or reply left by a user.
+@JsonSerializable(explicitToJson: true)
 @CopyWith()
 @immutable
 class Comment extends Equatable {
@@ -29,31 +30,41 @@ class Comment extends Equatable {
   factory Comment.fromJson(Map<String, Object?> json) =>
       _$CommentFromJson(json);
 
+  /// Unique identifier for comment.
   final String id;
 
+  /// Positioning information of the comment. Includes information on the location of the comment pin, which is either the absolute coordinates on the canvas or a relative offset within a frame. If the comment is a region, it will also contain the region height, width, and position of the anchor in regards to the region.
   @ClientMetaNullableConverter()
   @JsonKey(name: 'client_meta')
   final ClientMeta? clientMeta;
 
+  /// The file in which the comment lives
   @JsonKey(name: 'file_key')
   final String fileKey;
 
+  /// If present, the id of the comment to which this is the reply
   @JsonKey(name: 'parent_id')
   final String? parentId;
 
+  /// The user who left the comment
   final User user;
 
+  /// The UTC ISO 8601 time at which the comment was left
   @JsonKey(name: 'created_at')
   final DateTime createdAt;
 
+  /// If set, the UTC ISO 8601 time the comment was resolved
   @JsonKey(name: 'resolved_at')
   final DateTime? resolvedAt;
 
+  /// The content of the comment
   final String message;
 
+  /// Only set for top level comments. The number displayed with the comment in the UI
   @JsonKey(name: 'order_id')
   final String? orderId;
 
+  /// An array of reactions to the comment
   final List<Reaction> reactions;
 
   @override

@@ -5,6 +5,7 @@ import 'package:meta/meta.dart';
 
 part 'containing_component_set.g.dart';
 
+/// The component set node that contains the frame node.
 @JsonSerializable()
 @CopyWith()
 @immutable
@@ -14,8 +15,10 @@ class ContainingComponentSet extends Equatable {
   factory ContainingComponentSet.fromJson(Map<String, Object?> json) =>
       _$ContainingComponentSetFromJson(json);
 
+  /// The ID of the component set node.
   final String? nodeId;
 
+  /// The name of the component set node.
   final String? name;
 
   @override

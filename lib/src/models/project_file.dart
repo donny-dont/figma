@@ -19,13 +19,17 @@ class ProjectFile extends Equatable {
   factory ProjectFile.fromJson(Map<String, Object?> json) =>
       _$ProjectFileFromJson(json);
 
+  /// The file's key.
   final String key;
 
+  /// The file's name.
   final String name;
 
+  /// The file's thumbnail URL.
   @JsonKey(name: 'thumbnail_url')
   final String? thumbnailUrl;
 
+  /// The UTC ISO 8601 time at which the file was last modified.
   @JsonKey(name: 'last_modified')
   final DateTime lastModified;
 

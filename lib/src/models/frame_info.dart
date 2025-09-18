@@ -7,7 +7,8 @@ import 'containing_component_set.dart';
 
 part 'frame_info.g.dart';
 
-@JsonSerializable()
+/// Data on the frame a component resides in.
+@JsonSerializable(explicitToJson: true)
 @CopyWith()
 @immutable
 class FrameInfo extends Equatable {
@@ -23,16 +24,22 @@ class FrameInfo extends Equatable {
   factory FrameInfo.fromJson(Map<String, Object?> json) =>
       _$FrameInfoFromJson(json);
 
+  /// The ID of the frame node within the file.
   final String? nodeId;
 
+  /// The name of the frame node.
   final String? name;
 
+  /// The background color of the frame node.
   final String? backgroundColor;
 
+  /// The ID of the page containing the frame node.
   final String pageId;
 
+  /// The name of the page containing the frame node.
   final String pageName;
 
+  /// The component set node that contains the frame node.
   final ContainingComponentSet? containingComponentSet;
 
   @override

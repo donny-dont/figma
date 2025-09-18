@@ -8,7 +8,7 @@ import 'response_cursor.dart';
 
 part 'components_meta.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 @CopyWith()
 @immutable
 class ComponentsMeta extends Equatable {

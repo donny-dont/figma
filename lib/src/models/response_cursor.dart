@@ -5,6 +5,7 @@ import 'package:meta/meta.dart';
 
 part 'response_cursor.g.dart';
 
+/// Pagination cursor
 @JsonSerializable()
 @CopyWith()
 @immutable

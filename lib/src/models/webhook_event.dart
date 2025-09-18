@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
+/// An enum representing the possible events that a webhook can subscribe to
 enum WebhookEvent {
   @JsonValue('PING')
   ping,

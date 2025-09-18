@@ -5,6 +5,7 @@ import 'package:meta/meta.dart';
 
 part 'vector.g.dart';
 
+/// A 2d vector.
 @JsonSerializable()
 @CopyWith()
 @immutable
@@ -13,8 +14,10 @@ class Vector extends Equatable {
 
   factory Vector.fromJson(Map<String, Object?> json) => _$VectorFromJson(json);
 
+  /// X coordinate of the vector.
   final num x;
 
+  /// Y coordinate of the vector.
   final num y;
 
   @override

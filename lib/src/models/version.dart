@@ -7,7 +7,8 @@ import 'user.dart';
 
 part 'version.g.dart';
 
-@JsonSerializable()
+/// A version of a file
+@JsonSerializable(explicitToJson: true)
 @CopyWith()
 @immutable
 class Version extends Equatable {
@@ -23,17 +24,23 @@ class Version extends Equatable {
   factory Version.fromJson(Map<String, Object?> json) =>
       _$VersionFromJson(json);
 
+  /// Unique identifier for version
   final String id;
 
+  /// The UTC ISO 8601 time at which the version was created
   @JsonKey(name: 'created_at')
   final DateTime createdAt;
 
+  /// The label given to the version in the editor
   final String? label;
 
+  /// The description of the version as entered in the editor
   final String? description;
 
+  /// The user that created the version
   final User user;
 
+  /// A URL to a thumbnail image of the file version.
   @JsonKey(name: 'thumbnail_url')
   final String? thumbnailUrl;
 

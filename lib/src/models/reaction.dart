@@ -8,7 +8,8 @@ import 'user.dart';
 
 part 'reaction.g.dart';
 
-@JsonSerializable()
+/// A reaction left by a user.
+@JsonSerializable(explicitToJson: true)
 @CopyWith()
 @immutable
 class Reaction extends Equatable {
@@ -21,10 +22,12 @@ class Reaction extends Equatable {
   factory Reaction.fromJson(Map<String, Object?> json) =>
       _$ReactionFromJson(json);
 
+  /// The user who left the reaction.
   final User user;
 
   final Emoji emoji;
 
+  /// The UTC ISO 8601 time at which the reaction was left.
   @JsonKey(name: 'created_at')
   final DateTime createdAt;
 

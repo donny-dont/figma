@@ -8,7 +8,7 @@ import 'webhook_status.dart';
 
 part 'post_webhook.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 @CopyWith()
 @immutable
 class PostWebhook extends Equatable {
@@ -28,17 +28,23 @@ class PostWebhook extends Equatable {
   @JsonKey(name: 'event_type')
   final WebhookEvent eventType;
 
+  /// Context to create the webhook for. Must be "team", "project", or "file".
   final String context;
 
+  /// The id of the context you want to receive updates about.
   @JsonKey(name: 'context_id')
   final String contextId;
 
+  /// The HTTP endpoint that will receive a POST request when the event triggers. Max length 2048 characters.
   final String endpoint;
 
+  /// String that will be passed back to your webhook endpoint to verify that it is being called by Figma. Max length 100 characters.
   final String passcode;
 
+  /// State of the webhook, including any error state it may be in
   final WebhookStatus? status;
 
+  /// User provided description or name for the webhook. Max length 150 characters.
   final String? description;
 
   @override

@@ -7,7 +7,8 @@ import 'comment_pin_corner.dart';
 
 part 'region.g.dart';
 
-@JsonSerializable()
+/// Position of a region comment on the canvas.
+@JsonSerializable(explicitToJson: true)
 @CopyWith()
 @immutable
 class Region extends Equatable {
@@ -21,16 +22,21 @@ class Region extends Equatable {
 
   factory Region.fromJson(Map<String, Object?> json) => _$RegionFromJson(json);
 
+  /// X coordinate of the position.
   final num x;
 
+  /// Y coordinate of the position.
   final num y;
 
+  /// The height of the comment region. Must be greater than 0.
   @JsonKey(name: 'region_height')
   final num regionHeight;
 
+  /// The width of the comment region. Must be greater than 0.
   @JsonKey(name: 'region_width')
   final num regionWidth;
 
+  /// The corner of the comment region to pin to the node's corner as a string enum.
   @JsonKey(
     name: 'comment_pin_corner',
     defaultValue: CommentPinCorner.bottomRight,

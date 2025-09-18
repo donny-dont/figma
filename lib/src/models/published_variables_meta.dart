@@ -8,7 +8,7 @@ import 'published_variable_collection.dart';
 
 part 'published_variables_meta.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 @CopyWith()
 @immutable
 class PublishedVariablesMeta extends Equatable {
@@ -20,8 +20,10 @@ class PublishedVariablesMeta extends Equatable {
   factory PublishedVariablesMeta.fromJson(Map<String, Object?> json) =>
       _$PublishedVariablesMetaFromJson(json);
 
+  /// A map of variable ids to variables
   final Map<String, PublishedVariable> variables;
 
+  /// A map of variable collection ids to variable collections
   final Map<String, PublishedVariableCollection> variableCollections;
 
   @override

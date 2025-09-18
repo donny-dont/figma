@@ -7,7 +7,8 @@ import 'variable_resolved_data_type.dart';
 
 part 'published_variable.g.dart';
 
-@JsonSerializable()
+/// A Variable is a single design token that defines values for each of the modes in its VariableCollection. These values can be applied to various kinds of design properties.
+@JsonSerializable(explicitToJson: true)
 @CopyWith()
 @immutable
 class PublishedVariable extends Equatable {
@@ -24,19 +25,26 @@ class PublishedVariable extends Equatable {
   factory PublishedVariable.fromJson(Map<String, Object?> json) =>
       _$PublishedVariableFromJson(json);
 
+  /// The unique identifier of this variable.
   final String id;
 
+  /// The ID of the variable that is used by subscribing files. This ID changes every time the variable is modified and published.
   @JsonKey(name: 'subscribed_id')
   final String subscribedId;
 
+  /// The name of this variable.
   final String name;
 
+  /// The key of this variable.
   final String key;
 
+  /// The id of the variable collection that contains this variable.
   final String variableCollectionId;
 
+  /// The resolved type of the variable.
   final VariableResolvedDataType resolvedDataType;
 
+  /// The UTC ISO 8601 time at which the variable was last updated.
   final DateTime updatedAt;
 
   @override

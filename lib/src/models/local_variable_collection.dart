@@ -7,7 +7,8 @@ import 'mode.dart';
 
 part 'local_variable_collection.g.dart';
 
-@JsonSerializable()
+/// A grouping of related Variable objects each with the same modes.
+@JsonSerializable(explicitToJson: true)
 @CopyWith()
 @immutable
 class LocalVariableCollection extends Equatable {
@@ -25,20 +26,28 @@ class LocalVariableCollection extends Equatable {
   factory LocalVariableCollection.fromJson(Map<String, Object?> json) =>
       _$LocalVariableCollectionFromJson(json);
 
+  /// The unique identifier of this variable collection.
   final String id;
 
+  /// The name of this variable collection.
   final String name;
 
+  /// The key of this variable collection.
   final String key;
 
+  /// The modes of this variable collection.
   final List<Mode> modes;
 
+  /// The id of the default mode.
   final String defaultModeId;
 
+  /// Whether this variable collection is remote.
   final bool remote;
 
+  /// Whether this variable collection is hidden when publishing the current file as a library.
   final bool hiddenFromPublishing;
 
+  /// The ids of the variables in the collection. Note that the order of these variables is roughly the same as what is shown in Figma Design, however it does not account for groups. As a result, the order of these variables may not exactly reflect the exact ordering and grouping shown in the authoring UI.
   final List<String> variableIds;
 
   @override

@@ -5,6 +5,7 @@ import 'package:meta/meta.dart';
 
 part 'project.g.dart';
 
+/// A Project can be identified by both the Project name, and the Project ID.
 @JsonSerializable()
 @CopyWith()
 @immutable
@@ -14,8 +15,10 @@ class Project extends Equatable {
   factory Project.fromJson(Map<String, Object?> json) =>
       _$ProjectFromJson(json);
 
+  /// The ID of the project.
   final String id;
 
+  /// The name of the project.
   final String name;
 
   @override

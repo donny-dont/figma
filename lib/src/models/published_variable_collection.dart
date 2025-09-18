@@ -5,6 +5,7 @@ import 'package:meta/meta.dart';
 
 part 'published_variable_collection.g.dart';
 
+/// A grouping of related Variable objects each with the same modes.
 @JsonSerializable()
 @CopyWith()
 @immutable
@@ -20,15 +21,22 @@ class PublishedVariableCollection extends Equatable {
   factory PublishedVariableCollection.fromJson(Map<String, Object?> json) =>
       _$PublishedVariableCollectionFromJson(json);
 
+  /// The unique identifier of this variable collection.
   final String id;
 
+  /// The ID of the variable collection that is used by subscribing files. This ID changes every time the variable collection is modified and published.
   @JsonKey(name: 'subscribed_id')
   final String subscribedId;
 
+  /// The name of this variable collection.
   final String name;
 
+  /// The key of this variable collection.
   final String key;
 
+  /// The UTC ISO 8601 time at which the variable collection was last updated.
+  ///
+  /// This timestamp will change any time a variable in the collection is changed.
   final DateTime updatedAt;
 
   @override

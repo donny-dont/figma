@@ -7,7 +7,8 @@ import 'vector.dart';
 
 part 'frame_offset.g.dart';
 
-@JsonSerializable()
+/// Position of a comment relative to the frame to which it is attached.
+@JsonSerializable(explicitToJson: true)
 @CopyWith()
 @immutable
 class FrameOffset extends Equatable {
@@ -16,9 +17,11 @@ class FrameOffset extends Equatable {
   factory FrameOffset.fromJson(Map<String, Object?> json) =>
       _$FrameOffsetFromJson(json);
 
+  /// Unique id specifying the frame.
   @JsonKey(name: 'node_id')
   final String nodeId;
 
+  /// 2D vector offset within the frame from the top-left corner.
   @JsonKey(name: 'node_offset')
   final Vector nodeOffset;
 

@@ -8,7 +8,7 @@ import 'local_variable_collection.dart';
 
 part 'local_variables_meta.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 @CopyWith()
 @immutable
 class LocalVariablesMeta extends Equatable {
@@ -20,8 +20,10 @@ class LocalVariablesMeta extends Equatable {
   factory LocalVariablesMeta.fromJson(Map<String, Object?> json) =>
       _$LocalVariablesMetaFromJson(json);
 
+  /// A map of variable ids to variables
   final Map<String, LocalVariable> variables;
 
+  /// A map of variable collection ids to variable collections
   final Map<String, LocalVariableCollection> variableCollections;
 
   @override

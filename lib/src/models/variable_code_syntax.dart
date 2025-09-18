@@ -5,6 +5,7 @@ import 'package:meta/meta.dart';
 
 part 'variable_code_syntax.g.dart';
 
+/// An object containing platform-specific code syntax definitions for a variable. All platforms are optional.
 @JsonSerializable()
 @CopyWith()
 @immutable

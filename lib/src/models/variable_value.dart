@@ -31,6 +31,7 @@ class VariableValueConverter implements JsonConverter<VariableValue, Object> {
   Object toJson(VariableValue object) => switch (object) {
     Rgb() => object.toJson(),
     Rgba() => object.toJson(),
+    VariableAlias() => object.toJson(),
     _ => object,
   };
 

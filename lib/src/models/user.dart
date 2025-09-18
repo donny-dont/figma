@@ -5,6 +5,7 @@ import 'package:meta/meta.dart';
 
 part 'user.g.dart';
 
+/// A description of a user.
 @JsonSerializable()
 @CopyWith()
 @immutable
@@ -13,10 +14,13 @@ class User extends Equatable {
 
   factory User.fromJson(Map<String, Object?> json) => _$UserFromJson(json);
 
+  /// Unique stable id of the user.
   final String id;
 
+  /// Name of the user.
   final String handle;
 
+  /// URL link to the user's profile image.
   @JsonKey(name: 'img_url')
   final String imgUrl;
 

@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
+/// Access policy for users who have the link to the file.
 enum LinkAccess {
   @JsonValue('view')
   view,
