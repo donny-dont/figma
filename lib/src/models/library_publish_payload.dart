@@ -1,19 +1,22 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
 
 import 'library_item_data.dart';
 import 'user.dart';
 import 'webhook_event.dart';
+import 'webhook_payload.dart';
 
 part 'library_publish_payload.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 @CopyWith()
 @immutable
-class LibraryPublishPayload extends Equatable {
+class LibraryPublishPayload extends WebhookPayload {
   const LibraryPublishPayload({
+    required super.passcode,
+    required super.timestamp,
+    required super.webhookId,
     required this.eventType,
     required this.createdComponents,
     required this.createdStyles,
@@ -94,6 +97,7 @@ class LibraryPublishPayload extends Equatable {
 
   @override
   List<Object?> get props => <Object?>[
+    ...super.props,
     eventType,
     createdComponents,
     createdStyles,
@@ -111,5 +115,6 @@ class LibraryPublishPayload extends Equatable {
     triggeredBy,
   ];
 
+  @override
   Map<String, Object?> toJson() => _$LibraryPublishPayloadToJson(this);
 }

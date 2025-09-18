@@ -1,19 +1,22 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
 
 import 'comment_fragment.dart';
 import 'user.dart';
 import 'webhook_event.dart';
+import 'webhook_payload.dart';
 
 part 'file_comment_payload.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 @CopyWith()
 @immutable
-class FileCommentPayload extends Equatable {
+class FileCommentPayload extends WebhookPayload {
   const FileCommentPayload({
+    required super.passcode,
+    required super.timestamp,
+    required super.webhookId,
     required this.eventType,
     required this.comment,
     required this.commentId,
@@ -50,7 +53,7 @@ class FileCommentPayload extends Equatable {
   final String fileName;
 
   /// Users that were mentioned in the comment
-  @JsonKey(defaultValue: [])
+  @JsonKey(defaultValue: const [])
   final List<User> mentions;
 
   /// The user that made the comment and triggered this event
@@ -59,6 +62,7 @@ class FileCommentPayload extends Equatable {
 
   @override
   List<Object?> get props => <Object?>[
+    ...super.props,
     eventType,
     comment,
     commentId,
@@ -69,5 +73,6 @@ class FileCommentPayload extends Equatable {
     triggeredBy,
   ];
 
+  @override
   Map<String, Object?> toJson() => _$FileCommentPayloadToJson(this);
 }

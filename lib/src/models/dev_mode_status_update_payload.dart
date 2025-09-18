@@ -1,19 +1,22 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
 
 import 'dev_resource.dart';
 import 'user.dart';
 import 'webhook_event.dart';
+import 'webhook_payload.dart';
 
 part 'dev_mode_status_update_payload.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 @CopyWith()
 @immutable
-class DevModeStatusUpdatePayload extends Equatable {
+class DevModeStatusUpdatePayload extends WebhookPayload {
   const DevModeStatusUpdatePayload({
+    required super.passcode,
+    required super.timestamp,
+    required super.webhookId,
     required this.eventType,
     required this.fileKey,
     required this.fileName,
@@ -54,6 +57,7 @@ class DevModeStatusUpdatePayload extends Equatable {
 
   @override
   List<Object?> get props => <Object?>[
+    ...super.props,
     eventType,
     fileKey,
     fileName,
@@ -63,5 +67,6 @@ class DevModeStatusUpdatePayload extends Equatable {
     triggeredBy,
   ];
 
+  @override
   Map<String, Object?> toJson() => _$DevModeStatusUpdatePayloadToJson(this);
 }

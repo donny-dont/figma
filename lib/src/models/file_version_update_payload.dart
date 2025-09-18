@@ -1,18 +1,21 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
 
 import 'user.dart';
 import 'webhook_event.dart';
+import 'webhook_payload.dart';
 
 part 'file_version_update_payload.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 @CopyWith()
 @immutable
-class FileVersionUpdatePayload extends Equatable {
+class FileVersionUpdatePayload extends WebhookPayload {
   const FileVersionUpdatePayload({
+    required super.passcode,
+    required super.timestamp,
+    required super.webhookId,
     required this.eventType,
     required this.createdAt,
     this.description,
@@ -53,6 +56,7 @@ class FileVersionUpdatePayload extends Equatable {
 
   @override
   List<Object?> get props => <Object?>[
+    ...super.props,
     eventType,
     createdAt,
     description,
@@ -62,5 +66,6 @@ class FileVersionUpdatePayload extends Equatable {
     versionId,
   ];
 
+  @override
   Map<String, Object?> toJson() => _$FileVersionUpdatePayloadToJson(this);
 }
