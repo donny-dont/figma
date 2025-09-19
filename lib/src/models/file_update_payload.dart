@@ -15,16 +15,12 @@ class FileUpdatePayload extends WebhookPayload {
     required super.passcode,
     required super.timestamp,
     required super.webhookId,
-    required this.eventType,
     required this.fileKey,
     required this.fileName,
   });
 
   factory FileUpdatePayload.fromJson(Map<String, Object?> json) =>
       _$FileUpdatePayloadFromJson(json);
-
-  @JsonKey(name: 'event_type')
-  final WebhookEvent eventType;
 
   /// The key of the file that was updated
   @JsonKey(name: 'file_key')
@@ -33,6 +29,9 @@ class FileUpdatePayload extends WebhookPayload {
   /// The name of the file that was updated
   @JsonKey(name: 'file_name')
   final String fileName;
+
+  @override
+  WebhookEvent get eventType => WebhookEvent.fileUpdate;
 
   @override
   List<Object?> get props => <Object?>[

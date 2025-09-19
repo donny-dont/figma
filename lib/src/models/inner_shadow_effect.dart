@@ -1,0 +1,37 @@
+import 'package:copy_with_extension/copy_with_extension.dart';
+import 'package:json_annotation/json_annotation.dart';
+import 'package:meta/meta.dart';
+
+import 'effect_type.dart';
+import 'shadow_effect.dart';
+import 'shadow_effect_variables.dart';
+
+part 'inner_shadow_effect.g.dart';
+
+@JsonSerializable(explicitToJson: true)
+@CopyWith()
+@immutable
+class InnerShadowEffect extends ShadowEffect {
+  const InnerShadowEffect({
+    required super.color,
+    required super.blendMode,
+    required super.offset,
+    required super.radius,
+    super.spread = 0,
+    required super.visible,
+    super.boundVariables = const ShadowEffectVariables(),
+  });
+
+  factory InnerShadowEffect.fromJson(Map<String, Object?> json) =>
+      _$InnerShadowEffectFromJson(json);
+
+  /// A string literal representing the effect's type. Always check the type before reading other properties.
+  @override
+  EffectType get type => EffectType.innerShadow;
+
+  @override
+  List<Object?> get props => <Object?>[...super.props, type];
+
+  @override
+  Map<String, Object?> toJson() => _$InnerShadowEffectToJson(this);
+}

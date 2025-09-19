@@ -16,7 +16,6 @@ class FileVersionUpdatePayload extends WebhookPayload {
     required super.passcode,
     required super.timestamp,
     required super.webhookId,
-    required this.eventType,
     required this.createdAt,
     this.description,
     required this.fileKey,
@@ -27,9 +26,6 @@ class FileVersionUpdatePayload extends WebhookPayload {
 
   factory FileVersionUpdatePayload.fromJson(Map<String, Object?> json) =>
       _$FileVersionUpdatePayloadFromJson(json);
-
-  @JsonKey(name: 'event_type')
-  final WebhookEvent eventType;
 
   /// UTC ISO 8601 timestamp of when the version was created
   @JsonKey(name: 'created_at')
@@ -53,6 +49,9 @@ class FileVersionUpdatePayload extends WebhookPayload {
   /// ID of the published version
   @JsonKey(name: 'version_id')
   final String versionId;
+
+  @override
+  WebhookEvent get eventType => WebhookEvent.fileVersionUpdate;
 
   @override
   List<Object?> get props => <Object?>[

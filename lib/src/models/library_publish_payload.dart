@@ -17,7 +17,6 @@ class LibraryPublishPayload extends WebhookPayload {
     required super.passcode,
     required super.timestamp,
     required super.webhookId,
-    required this.eventType,
     required this.createdComponents,
     required this.createdStyles,
     required this.createdVariables,
@@ -36,9 +35,6 @@ class LibraryPublishPayload extends WebhookPayload {
 
   factory LibraryPublishPayload.fromJson(Map<String, Object?> json) =>
       _$LibraryPublishPayloadFromJson(json);
-
-  @JsonKey(name: 'event_type')
-  final WebhookEvent eventType;
 
   /// Components that were created by the library publish
   @JsonKey(name: 'created_components')
@@ -94,6 +90,9 @@ class LibraryPublishPayload extends WebhookPayload {
   /// The user that published the library and triggered this event
   @JsonKey(name: 'triggered_by')
   final User triggeredBy;
+
+  @override
+  WebhookEvent get eventType => WebhookEvent.libraryPublish;
 
   @override
   List<Object?> get props => <Object?>[

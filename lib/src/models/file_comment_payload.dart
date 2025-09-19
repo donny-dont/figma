@@ -17,7 +17,6 @@ class FileCommentPayload extends WebhookPayload {
     required super.passcode,
     required super.timestamp,
     required super.webhookId,
-    required this.eventType,
     required this.comment,
     required this.commentId,
     required this.createdAt,
@@ -29,9 +28,6 @@ class FileCommentPayload extends WebhookPayload {
 
   factory FileCommentPayload.fromJson(Map<String, Object?> json) =>
       _$FileCommentPayloadFromJson(json);
-
-  @JsonKey(name: 'event_type')
-  final WebhookEvent eventType;
 
   /// Contents of the comment itself
   final List<CommentFragment> comment;
@@ -53,12 +49,15 @@ class FileCommentPayload extends WebhookPayload {
   final String fileName;
 
   /// Users that were mentioned in the comment
-  @JsonKey(defaultValue: const [])
+  @JsonKey(defaultValue: [])
   final List<User> mentions;
 
   /// The user that made the comment and triggered this event
   @JsonKey(name: 'triggered_by')
   final User triggeredBy;
+
+  @override
+  WebhookEvent get eventType => WebhookEvent.fileComment;
 
   @override
   List<Object?> get props => <Object?>[

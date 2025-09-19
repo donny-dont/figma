@@ -15,14 +15,13 @@ class PingPayload extends WebhookPayload {
     required super.passcode,
     required super.timestamp,
     required super.webhookId,
-    required this.eventType,
   });
 
   factory PingPayload.fromJson(Map<String, Object?> json) =>
       _$PingPayloadFromJson(json);
 
-  @JsonKey(name: 'event_type')
-  final WebhookEvent eventType;
+  @override
+  WebhookEvent get eventType => WebhookEvent.ping;
 
   @override
   List<Object?> get props => <Object?>[...super.props, eventType];

@@ -17,7 +17,6 @@ class DevModeStatusUpdatePayload extends WebhookPayload {
     required super.passcode,
     required super.timestamp,
     required super.webhookId,
-    required this.eventType,
     required this.fileKey,
     required this.fileName,
     required this.nodeId,
@@ -28,9 +27,6 @@ class DevModeStatusUpdatePayload extends WebhookPayload {
 
   factory DevModeStatusUpdatePayload.fromJson(Map<String, Object?> json) =>
       _$DevModeStatusUpdatePayloadFromJson(json);
-
-  @JsonKey(name: 'event_type')
-  final WebhookEvent eventType;
 
   /// The key of the file that was updated
   @JsonKey(name: 'file_key')
@@ -54,6 +50,9 @@ class DevModeStatusUpdatePayload extends WebhookPayload {
   /// The user that made the status change and triggered the event
   @JsonKey(name: 'triggered_by')
   final User triggeredBy;
+
+  @override
+  WebhookEvent get eventType => WebhookEvent.devModeStatusUpdate;
 
   @override
   List<Object?> get props => <Object?>[
