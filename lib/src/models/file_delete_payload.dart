@@ -42,7 +42,6 @@ class FileDeletePayload extends WebhookPayload {
   @override
   List<Object?> get props => <Object?>[
     ...super.props,
-    eventType,
     fileKey,
     fileName,
     triggeredBy,

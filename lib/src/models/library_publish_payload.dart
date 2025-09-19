@@ -97,7 +97,6 @@ class LibraryPublishPayload extends WebhookPayload {
   @override
   List<Object?> get props => <Object?>[
     ...super.props,
-    eventType,
     createdComponents,
     createdStyles,
     createdVariables,

@@ -70,6 +70,7 @@ abstract class ShadowEffect extends Effect {
   @override
   List<Object?> get props => <Object?>[
     ...super.props,
+    type,
     color,
     blendMode,
     offset,

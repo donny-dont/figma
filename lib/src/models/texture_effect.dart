@@ -41,7 +41,6 @@ class TextureEffect extends Effect {
   @override
   List<Object?> get props => <Object?>[
     ...super.props,
-    type,
     visible,
     noiseSize,
     radius,

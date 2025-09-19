@@ -56,7 +56,6 @@ class FileVersionUpdatePayload extends WebhookPayload {
   @override
   List<Object?> get props => <Object?>[
     ...super.props,
-    eventType,
     createdAt,
     description,
     fileKey,

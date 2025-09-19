@@ -62,7 +62,6 @@ class FileCommentPayload extends WebhookPayload {
   @override
   List<Object?> get props => <Object?>[
     ...super.props,
-    eventType,
     comment,
     commentId,
     createdAt,

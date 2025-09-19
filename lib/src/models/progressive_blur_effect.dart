@@ -42,7 +42,6 @@ class ProgressiveBlurEffect extends BlurEffect {
   @override
   List<Object?> get props => <Object?>[
     ...super.props,
-    blurType,
     startRadius,
     startOffset,
     endOffset,

@@ -1,4 +1,3 @@
-import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
 
@@ -8,7 +7,6 @@ import 'noise_type.dart';
 part 'monotone_noise_effect.g.dart';
 
 @JsonSerializable(explicitToJson: true)
-@CopyWith()
 @immutable
 class MonotoneNoiseEffect extends NoiseEffect {
   const MonotoneNoiseEffect({
@@ -27,7 +25,7 @@ class MonotoneNoiseEffect extends NoiseEffect {
   NoiseType get noiseType => NoiseType.monotone;
 
   @override
-  List<Object?> get props => <Object?>[...super.props, noiseType];
+  List<Object?> get props => <Object?>[...super.props];
 
   @override
   Map<String, Object?> toJson() => _$MonotoneNoiseEffectToJson(this);

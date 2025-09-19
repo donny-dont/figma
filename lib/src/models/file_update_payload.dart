@@ -34,12 +34,7 @@ class FileUpdatePayload extends WebhookPayload {
   WebhookEvent get eventType => WebhookEvent.fileUpdate;
 
   @override
-  List<Object?> get props => <Object?>[
-    ...super.props,
-    eventType,
-    fileKey,
-    fileName,
-  ];
+  List<Object?> get props => <Object?>[...super.props, fileKey, fileName];
 
   @override
   Map<String, Object?> toJson() => _$FileUpdatePayloadToJson(this);

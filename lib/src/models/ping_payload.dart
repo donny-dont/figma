@@ -1,4 +1,3 @@
-import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
 
@@ -8,7 +7,6 @@ import 'webhook_payload.dart';
 part 'ping_payload.g.dart';
 
 @JsonSerializable(explicitToJson: true)
-@CopyWith()
 @immutable
 class PingPayload extends WebhookPayload {
   const PingPayload({
@@ -24,7 +22,7 @@ class PingPayload extends WebhookPayload {
   WebhookEvent get eventType => WebhookEvent.ping;
 
   @override
-  List<Object?> get props => <Object?>[...super.props, eventType];
+  List<Object?> get props => <Object?>[...super.props];
 
   @override
   Map<String, Object?> toJson() => _$PingPayloadToJson(this);

@@ -66,7 +66,7 @@ abstract class NoiseEffect extends Effect {
   @override
   List<Object?> get props => <Object?>[
     ...super.props,
-    type,
+    noiseType,
     color,
     visible,
     blendMode,

@@ -32,11 +32,7 @@ class DuotoneNoiseEffect extends NoiseEffect {
   NoiseType get noiseType => NoiseType.duotone;
 
   @override
-  List<Object?> get props => <Object?>[
-    ...super.props,
-    noiseType,
-    secondaryColor,
-  ];
+  List<Object?> get props => <Object?>[...super.props, secondaryColor];
 
   @override
   Map<String, Object?> toJson() => _$DuotoneNoiseEffectToJson(this);

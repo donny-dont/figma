@@ -57,7 +57,12 @@ abstract class WebhookPayload extends Equatable {
   /// Discriminator for [WebhookPayload] types.
   WebhookEvent get eventType;
   @override
-  List<Object?> get props => <Object?>[passcode, timestamp, webhookId];
+  List<Object?> get props => <Object?>[
+    eventType,
+    passcode,
+    timestamp,
+    webhookId,
+  ];
 
   Map<String, Object?> toJson() => _$WebhookPayloadToJson(this);
 }

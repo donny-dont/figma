@@ -31,7 +31,7 @@ class MultitoneNoiseEffect extends NoiseEffect {
   NoiseType get noiseType => NoiseType.multitone;
 
   @override
-  List<Object?> get props => <Object?>[...super.props, noiseType, opacity];
+  List<Object?> get props => <Object?>[...super.props, opacity];
 
   @override
   Map<String, Object?> toJson() => _$MultitoneNoiseEffectToJson(this);

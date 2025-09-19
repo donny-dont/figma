@@ -55,7 +55,7 @@ abstract class BlurEffect extends Effect {
   @override
   List<Object?> get props => <Object?>[
     ...super.props,
-    type,
+    blurType,
     visible,
     radius,
     boundVariables,

@@ -34,11 +34,7 @@ class DropShadowEffect extends ShadowEffect {
   EffectType get type => EffectType.dropShadow;
 
   @override
-  List<Object?> get props => <Object?>[
-    ...super.props,
-    type,
-    showShadowBehindNode,
-  ];
+  List<Object?> get props => <Object?>[...super.props, showShadowBehindNode];
 
   @override
   Map<String, Object?> toJson() => _$DropShadowEffectToJson(this);

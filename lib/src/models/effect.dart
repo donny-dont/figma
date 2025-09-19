@@ -1,4 +1,3 @@
-import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
@@ -12,7 +11,6 @@ import 'texture_effect.dart';
 part 'effect.g.dart';
 
 @JsonSerializable()
-@CopyWith()
 @immutable
 abstract class Effect extends Equatable {
   const Effect();
@@ -33,7 +31,7 @@ abstract class Effect extends Equatable {
   /// Discriminator for [Effect] types.
   EffectType get type;
   @override
-  List<Object?> get props => <Object?>[];
+  List<Object?> get props => <Object?>[type];
 
   Map<String, Object?> toJson() => _$EffectToJson(this);
 }
