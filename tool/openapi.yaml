@@ -9436,18 +9436,19 @@ components:
       content:
         application/json:
           schema:
+            x-dart-type: LocalVariablesResponse
             type: object
             properties:
-              #status:
-              #  type: number
-              #  enum:
-              #    - 200
-              #  description: The response status code.
-              #error:
-              #  type: boolean
-              #  enum:
-              #    - false
-              #  description: For successful requests, this value is always `false`.
+              status:
+                type: number
+                enum:
+                  - 200
+                description: The response status code.
+              error:
+                type: boolean
+                enum:
+                  - false
+                description: For successful requests, this value is always `false`.
               meta:
                 type: object
                 x-dart-type: LocalVariablesMeta
@@ -9474,18 +9475,19 @@ components:
       content:
         application/json:
           schema:
+            x-dart-type: PublishedVariablesResponse
             type: object
             properties:
-              #status:
-              #  type: number
-              #  enum:
-              #    - 200
-              #  description: The response status code.
-              #error:
-              #  type: boolean
-              #  enum:
-              #    - false
-              #  description: For successful requests, this value is always `false`.
+              status:
+                type: number
+                enum:
+                  - 200
+                description: The response status code.
+              error:
+                type: boolean
+                enum:
+                  - false
+                description: For successful requests, this value is always `false`.
               meta:
                 type: object
                 x-dart-type: PublishedVariablesMeta

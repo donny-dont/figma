@@ -61,6 +61,17 @@ extension ClassHierarchy on ClassDefinition {
     }
   }
 
+  Iterable<PropertyDefinition> get discriminators sync* {
+    final extending = extend;
+    if (extending != null) {
+      yield* extending.discriminators;
+    }
+
+    if (discriminator != null) {
+      yield discriminator!;
+    }
+  }
+
   Iterable<PropertyDefinition> get getters =>
       properties.where((d) => !_isField(d));
 

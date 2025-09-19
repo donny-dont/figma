@@ -361,6 +361,7 @@ class DefinitionContext {
       description: definition.description,
       serializedName: name,
       type: isNullable ? type.nullable() : type,
+      isRequired: required,
       isDeprecated: deprecated,
       defaultsTo: defaultsTo,
       singleValue: singleValue,
@@ -515,6 +516,7 @@ final class PropertyDefinition extends Definition {
     required this.name,
     required this.serializedName,
     required this.type,
+    this.isRequired = true,
     this.isDeprecated = false,
     this.isDiscriminator = false,
     this.defaultsTo,
@@ -529,6 +531,9 @@ final class PropertyDefinition extends Definition {
 
   /// The type for the property.
   final Type type;
+
+  /// Whether the property is required.
+  final bool isRequired;
 
   /// Whether the property is deprecated.
   final bool isDeprecated;

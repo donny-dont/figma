@@ -36,16 +36,57 @@ extension on String {
 
 code.Library schemaLibrary(TypeDefinition value, {String? comment}) {
   final spec = schemaSpec(value);
-
-  final library = code.LibraryBuilder()
-    ..body.add(spec)
-    ..generatedByComment = comment;
+  final directives = <code.Directive>[];
 
   if (spec is code.Class && !spec.mixin) {
-    library.directives.add(code.Directive.part(value.dartPartFile!));
+    directives.add(code.Directive.part(value.dartPartFile!));
+
+    if (value is ClassDefinition) {
+      final extend = value.extend;
+
+      if (extend != null) {
+        // The json_serialization generator can't currently add in types that are
+        // used in super classes. Might change with extended parts implementation.
+        MapEntry<String, String?> createEntry(PropertyDefinition p) {
+          final typeDefinition = p.type.definition;
+          return MapEntry<String, String?>(
+            typeDefinition.name,
+            typeDefinition.dartFile,
+          );
+        }
+
+        // Get all the types used in the hierarchy
+        final superTypes =
+            Map<String, String?>.fromEntries(<MapEntry<String, String?>>[
+              ...extend.fields.map(createEntry),
+              ...extend.discriminators.map(createEntry),
+            ]);
+
+        // Remove any types that are already used by the class
+        for (final property in value.properties) {
+          superTypes.remove(property.type.definition.name);
+        }
+
+        final discriminator = value.discriminator;
+        if (discriminator != null) {
+          superTypes.remove(discriminator.type.definition.name);
+        }
+
+        for (final value in superTypes.values) {
+          if (value != null) {
+            directives.add(code.Directive.import(value));
+          }
+        }
+      }
+    }
   }
 
-  return library.build();
+  return code.Library(
+    (l) => l
+      ..directives.addAll(directives)
+      ..body.add(spec)
+      ..generatedByComment = comment,
+  );
 }
 
 code.Library exportLibrary(String path, List<String> exports) {
@@ -83,6 +124,22 @@ code.Spec classSpec(ClassDefinition value) {
 
   final discriminator = value.discriminator;
   final hasDiscriminator = discriminator != null;
+  var generateDiscriminatorProperty = hasDiscriminator;
+
+  if (discriminator != null) {
+    // See if the discriminator is present on the superclass
+    final superDiscriminator = value.extend?.discriminator;
+    if (superDiscriminator != null &&
+        superDiscriminator.name == discriminator.name) {
+      generateDiscriminatorProperty = false;
+    }
+  }
+
+  final isAbstract = hasDiscriminator;
+
+  if (isAbstract) {
+    jsonSerializableArguments['createFactory'] = code.literalFalse;
+  }
 
   final fields = value.fields;
 
@@ -91,11 +148,11 @@ code.Spec classSpec(ClassDefinition value) {
       ..name = dartName
       ..annotations.addAll(<code.Expression>[
         annotate.jsonSerializable(jsonSerializableArguments),
-        if (value.fields.isNotEmpty) annotate.copyWith,
+        if (value.fields.isNotEmpty && !isAbstract) annotate.copyWith,
         annotate.immutable,
       ])
       ..docs.addAll(value.description.toDocumentation)
-      ..abstract = hasDiscriminator
+      ..abstract = isAbstract
       ..extend = extend
       ..mixins.addAll(value.mixinReferences)
       ..constructors.addAll(<code.Constructor>[
@@ -120,22 +177,22 @@ code.Spec classSpec(ClassDefinition value) {
             )
             ..lambda = !hasDiscriminator
             ..body = hasDiscriminator
-                ? _discriminatorConstructorBody(discriminator)
+                ? _discriminatorConstructorBody(discriminator!)
                 : code.refer('_\$${dartName}FromJson').call(<code.Expression>[
                     code.refer('json'),
                   ]).code,
         ),
       ])
-      ..fields.addAll(<code.Field>[
-        ...fields.map(_fieldClassPropertySpec),
-      ])
+      ..fields.addAll(<code.Field>[...fields.map(_fieldClassPropertySpec)])
       ..methods.addAll(<code.Method>[
-        if (hasDiscriminator) _getterPropertySpec()(discriminator),
+        if (generateDiscriminatorProperty)
+          _getterPropertySpec()(discriminator!),
         ...value.getters.map(
           _getterPropertySpec(
             annotateWith: [
               if (extend != reference.equatable) annotate.override,
             ],
+            addJsonKey: true,
           ),
         ),
         code.Method(
@@ -184,7 +241,9 @@ _ClassConstructorMapper _constructorParameterSpec({required bool toSuper}) =>
       late final bool required;
 
       if (defaultsTo != null) {
-        defaultToCode = _parameterDefault(type, defaultsTo).code;
+        defaultToCode = !toSuper
+            ? _parameterDefault(type, defaultsTo).code
+            : null;
         required = false;
       } else {
         defaultToCode = null;
@@ -201,20 +260,6 @@ _ClassConstructorMapper _constructorParameterSpec({required bool toSuper}) =>
           ..defaultTo = defaultToCode,
       );
     };
-
-code.Expression _jsonAnnotationDefault(Type type, Object value) =>
-    type.isBuiltin
-    ? code.literal(value)
-    : _jsonAnnotationDefaultValueSchemaToCode(type.definition, value);
-
-code.Expression _jsonAnnotationDefaultValueSchemaToCode(
-  TypeDefinition schema,
-  Object value,
-) => switch (schema) {
-  EnumDefinition() => schema.dartValue(value),
-  ClassDefinition() => code.literalMap({}),
-  _ => throw ArgumentError.value(schema, 'schema', 'unsupported schema'),
-};
 
 code.Expression _parameterDefault(Type type, Object value) => type.isBuiltin
     ? _parameterDefaultLiteralToCode(value)
@@ -255,9 +300,21 @@ _ClassFieldMapper _fieldPropertySpec({
     arguments['name'] = code.literalString(serializedName);
   }
 
+  final type = value.type;
   final defaultsTo = value.defaultsTo;
   if (defaultsTo != null) {
-    arguments['defaultValue'] = _jsonAnnotationDefault(value.type, defaultsTo);
+    if (type.isBuiltin) {
+      arguments['defaultValue'] = code.literal(defaultsTo);
+    } else {
+      final typeDefinition = type.definition;
+      if (typeDefinition is EnumDefinition) {
+        arguments['defaultValue'] = typeDefinition.dartValue(defaultsTo);
+      }
+    }
+  }
+
+  if (type.isNullable && !value.isRequired) {
+    arguments['includeIfNull'] = code.literalFalse;
   }
 
   final docs = !annotateWith.contains(annotate.override)
@@ -291,18 +348,36 @@ typedef _ClassGetterMapper = code.Method Function(PropertyDefinition);
 
 _ClassGetterMapper _getterPropertySpec({
   List<code.Expression> annotateWith = const <code.Expression>[],
-}) =>
-    (value) => code.Method(
-      (m) => m
-        ..name = value.name
-        ..annotations.addAll(annotateWith)
-        ..docs.addAll(value.description.toDocumentation)
-        ..type = code.MethodType.getter
-        ..body = value.singleValue
-            ? _parameterDefault(value.type, value.defaultsTo!).code
-            : null
-        ..returns = typeSpec(value.type),
-    );
+  bool addJsonKey = false,
+}) => (value) {
+  final name = value.name;
+
+  final arguments = <String, code.Expression>{};
+
+  if (addJsonKey) {
+    arguments['includeToJson'] = code.literalTrue;
+
+    final serializedName = value.serializedName;
+    if (name != serializedName) {
+      arguments['name'] = code.literalString(serializedName);
+    }
+  }
+
+  return code.Method(
+    (m) => m
+      ..name = name
+      ..annotations.addAll(<code.Expression>[
+        if (arguments.isNotEmpty) annotate.jsonKey(arguments),
+        ...annotateWith,
+      ])
+      ..docs.addAll(value.description.toDocumentation)
+      ..type = code.MethodType.getter
+      ..body = value.singleValue
+          ? _parameterDefault(value.type, value.defaultsTo!).code
+          : null
+      ..returns = typeSpec(value.type),
+  );
+};
 
 code.Spec enumSpec(EnumDefinition value) => code.Enum(
   (e) => e
