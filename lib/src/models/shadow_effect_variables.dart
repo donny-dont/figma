@@ -23,14 +23,19 @@ class ShadowEffectVariables extends Equatable {
   factory ShadowEffectVariables.fromJson(Map<String, Object?> json) =>
       _$ShadowEffectVariablesFromJson(json);
 
+  @JsonKey(includeIfNull: false)
   final VariableAlias? radius;
 
+  @JsonKey(includeIfNull: false)
   final VariableAlias? spread;
 
+  @JsonKey(includeIfNull: false)
   final VariableAlias? color;
 
+  @JsonKey(includeIfNull: false)
   final VariableAlias? offsetX;
 
+  @JsonKey(includeIfNull: false)
   final VariableAlias? offsetY;
 
   @override

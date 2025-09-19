@@ -2,9 +2,12 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
 
+import 'blend_mode.dart';
 import 'effect_type.dart';
+import 'rgba.dart';
 import 'shadow_effect.dart';
 import 'shadow_effect_variables.dart';
+import 'vector.dart';
 
 part 'drop_shadow_effect.g.dart';
 
@@ -17,9 +20,9 @@ class DropShadowEffect extends ShadowEffect {
     required super.blendMode,
     required super.offset,
     required super.radius,
-    super.spread = 0,
+    super.spread,
     required super.visible,
-    super.boundVariables = const ShadowEffectVariables(),
+    super.boundVariables,
     required this.showShadowBehindNode,
   });
 
@@ -30,6 +33,7 @@ class DropShadowEffect extends ShadowEffect {
   final bool showShadowBehindNode;
 
   /// A string literal representing the effect's type. Always check the type before reading other properties.
+  @JsonKey(includeToJson: true)
   @override
   EffectType get type => EffectType.dropShadow;
 

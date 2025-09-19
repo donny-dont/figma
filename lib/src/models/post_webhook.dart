@@ -42,9 +42,11 @@ class PostWebhook extends Equatable {
   final String passcode;
 
   /// State of the webhook, including any error state it may be in
+  @JsonKey(includeIfNull: false)
   final WebhookStatus? status;
 
   /// User provided description or name for the webhook. Max length 150 characters.
+  @JsonKey(includeIfNull: false)
   final String? description;
 
   @override

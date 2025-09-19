@@ -1,4 +1,3 @@
-import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
 
@@ -13,8 +12,7 @@ import 'rgba.dart';
 
 part 'noise_effect.g.dart';
 
-@JsonSerializable(explicitToJson: true)
-@CopyWith()
+@JsonSerializable(explicitToJson: true, createFactory: false)
 @immutable
 abstract class NoiseEffect extends Effect {
   const NoiseEffect({
@@ -60,6 +58,7 @@ abstract class NoiseEffect extends Effect {
   NoiseType get noiseType;
 
   /// The string literal 'NOISE' representing the effect's type. Always check the type before reading other properties.
+  @JsonKey(includeToJson: true)
   @override
   EffectType get type => EffectType.noise;
 

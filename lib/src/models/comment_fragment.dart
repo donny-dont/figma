@@ -16,9 +16,11 @@ class CommentFragment extends Equatable {
       _$CommentFragmentFromJson(json);
 
   /// Comment text that is set if a fragment is text based
+  @JsonKey(includeIfNull: false)
   final String? text;
 
   /// User id that is set if a fragment refers to a user mention
+  @JsonKey(includeIfNull: false)
   final String? mention;
 
   @override

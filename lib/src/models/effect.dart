@@ -10,7 +10,7 @@ import 'texture_effect.dart';
 
 part 'effect.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(createFactory: false)
 @immutable
 abstract class Effect extends Equatable {
   const Effect();

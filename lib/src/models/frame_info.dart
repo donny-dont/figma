@@ -25,12 +25,15 @@ class FrameInfo extends Equatable {
       _$FrameInfoFromJson(json);
 
   /// The ID of the frame node within the file.
+  @JsonKey(includeIfNull: false)
   final String? nodeId;
 
   /// The name of the frame node.
+  @JsonKey(includeIfNull: false)
   final String? name;
 
   /// The background color of the frame node.
+  @JsonKey(includeIfNull: false)
   final String? backgroundColor;
 
   /// The ID of the page containing the frame node.

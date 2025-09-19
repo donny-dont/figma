@@ -45,7 +45,7 @@ class PublishedStyle extends Equatable {
   final StyleType styleType;
 
   /// A URL to a thumbnail image of the style.
-  @JsonKey(name: 'thumbnail_url')
+  @JsonKey(name: 'thumbnail_url', includeIfNull: false)
   final String? thumbnailUrl;
 
   /// The name of the style.

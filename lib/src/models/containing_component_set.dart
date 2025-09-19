@@ -16,9 +16,11 @@ class ContainingComponentSet extends Equatable {
       _$ContainingComponentSetFromJson(json);
 
   /// The ID of the component set node.
+  @JsonKey(includeIfNull: false)
   final String? nodeId;
 
   /// The name of the component set node.
+  @JsonKey(includeIfNull: false)
   final String? name;
 
   @override

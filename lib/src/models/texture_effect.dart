@@ -35,6 +35,7 @@ class TextureEffect extends Effect {
   final bool clipToShape;
 
   /// The string literal 'TEXTURE' representing the effect's type. Always check the type before reading other properties.
+  @JsonKey(includeToJson: true)
   @override
   EffectType get type => EffectType.texture;
 

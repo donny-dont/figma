@@ -1,4 +1,3 @@
-import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
@@ -14,8 +13,7 @@ import 'webhook_event.dart';
 
 part 'webhook_payload.g.dart';
 
-@JsonSerializable()
-@CopyWith()
+@JsonSerializable(createFactory: false)
 @immutable
 abstract class WebhookPayload extends Equatable {
   const WebhookPayload({

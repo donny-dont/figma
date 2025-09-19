@@ -19,6 +19,7 @@ class ComponentsMeta extends Equatable {
 
   final List<PublishedComponent> components;
 
+  @JsonKey(includeIfNull: false)
   final ResponseCursor? cursor;
 
   @override

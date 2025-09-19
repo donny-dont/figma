@@ -41,7 +41,7 @@ class Version extends Equatable {
   final User user;
 
   /// A URL to a thumbnail image of the file version.
-  @JsonKey(name: 'thumbnail_url')
+  @JsonKey(name: 'thumbnail_url', includeIfNull: false)
   final String? thumbnailUrl;
 
   @override

@@ -73,6 +73,7 @@ class LibraryPublishPayload extends WebhookPayload {
   final List<LibraryItemData> deletedVariables;
 
   /// Description of the library publish
+  @JsonKey(includeIfNull: false)
   final String? description;
 
   /// The key of the file that was published
@@ -91,6 +92,7 @@ class LibraryPublishPayload extends WebhookPayload {
   @JsonKey(name: 'triggered_by')
   final User triggeredBy;
 
+  @JsonKey(includeToJson: true, name: 'event_type')
   @override
   WebhookEvent get eventType => WebhookEvent.libraryPublish;
 

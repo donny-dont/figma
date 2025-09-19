@@ -1,11 +1,9 @@
-import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
 
 import 'blend_mode.dart';
 import 'drop_shadow_effect.dart';
 import 'effect.dart';
-import 'effect_type.dart';
 import 'inner_shadow_effect.dart';
 import 'rgba.dart';
 import 'shadow_effect_variables.dart';
@@ -13,8 +11,7 @@ import 'vector.dart';
 
 part 'shadow_effect.g.dart';
 
-@JsonSerializable(explicitToJson: true)
-@CopyWith()
+@JsonSerializable(explicitToJson: true, createFactory: false)
 @immutable
 abstract class ShadowEffect extends Effect {
   const ShadowEffect({
@@ -62,11 +59,8 @@ abstract class ShadowEffect extends Effect {
   final bool visible;
 
   /// The variables bound to a particular field on this shadow effect
-  @JsonKey(defaultValue: {})
   final ShadowEffectVariables boundVariables;
 
-  /// Discriminator for [ShadowEffect] types.
-  EffectType get type;
   @override
   List<Object?> get props => <Object?>[
     ...super.props,

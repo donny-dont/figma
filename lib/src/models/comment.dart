@@ -43,7 +43,7 @@ class Comment extends Equatable {
   final String fileKey;
 
   /// If present, the id of the comment to which this is the reply
-  @JsonKey(name: 'parent_id')
+  @JsonKey(name: 'parent_id', includeIfNull: false)
   final String? parentId;
 
   /// The user who left the comment

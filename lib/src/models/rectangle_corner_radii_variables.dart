@@ -21,16 +21,16 @@ class RectangleCornerRadiiVariables extends Equatable {
   factory RectangleCornerRadiiVariables.fromJson(Map<String, Object?> json) =>
       _$RectangleCornerRadiiVariablesFromJson(json);
 
-  @JsonKey(name: 'RECTANGLE_TOP_LEFT_CORNER_RADIUS')
+  @JsonKey(name: 'RECTANGLE_TOP_LEFT_CORNER_RADIUS', includeIfNull: false)
   final VariableAlias? topLeft;
 
-  @JsonKey(name: 'RECTANGLE_TOP_RIGHT_CORNER_RADIUS')
+  @JsonKey(name: 'RECTANGLE_TOP_RIGHT_CORNER_RADIUS', includeIfNull: false)
   final VariableAlias? topRight;
 
-  @JsonKey(name: 'RECTANGLE_BOTTOM_LEFT_CORNER_RADIUS')
+  @JsonKey(name: 'RECTANGLE_BOTTOM_LEFT_CORNER_RADIUS', includeIfNull: false)
   final VariableAlias? bottomLeft;
 
-  @JsonKey(name: 'RECTANGLE_BOTTOM_RIGHT_CORNER_RADIUS')
+  @JsonKey(name: 'RECTANGLE_BOTTOM_RIGHT_CORNER_RADIUS', includeIfNull: false)
   final VariableAlias? bottomRight;
 
   @override

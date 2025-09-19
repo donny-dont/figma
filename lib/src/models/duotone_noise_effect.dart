@@ -2,6 +2,8 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
 
+import 'blend_mode.dart';
+import 'effect_type.dart';
 import 'noise_effect.dart';
 import 'noise_type.dart';
 import 'rgba.dart';
@@ -28,6 +30,7 @@ class DuotoneNoiseEffect extends NoiseEffect {
   final Rgba secondaryColor;
 
   /// The string literal 'DUOTONE' representing the noise type.
+  @JsonKey(includeToJson: true)
   @override
   NoiseType get noiseType => NoiseType.duotone;
 

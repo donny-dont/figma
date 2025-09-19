@@ -18,6 +18,7 @@ class PingPayload extends WebhookPayload {
   factory PingPayload.fromJson(Map<String, Object?> json) =>
       _$PingPayloadFromJson(json);
 
+  @JsonKey(includeToJson: true, name: 'event_type')
   @override
   WebhookEvent get eventType => WebhookEvent.ping;
 

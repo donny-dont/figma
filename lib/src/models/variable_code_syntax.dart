@@ -15,13 +15,13 @@ class VariableCodeSyntax extends Equatable {
   factory VariableCodeSyntax.fromJson(Map<String, Object?> json) =>
       _$VariableCodeSyntaxFromJson(json);
 
-  @JsonKey(name: 'WEB')
+  @JsonKey(name: 'WEB', includeIfNull: false)
   final String? web;
 
-  @JsonKey(name: 'ANDROID')
+  @JsonKey(name: 'ANDROID', includeIfNull: false)
   final String? android;
 
-  @JsonKey(name: 'iOS')
+  @JsonKey(name: 'iOS', includeIfNull: false)
   final String? iOs;
 
   @override

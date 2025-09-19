@@ -41,7 +41,7 @@ class PublishedComponent extends Equatable {
   final String nodeId;
 
   /// A URL to a thumbnail image of the component.
-  @JsonKey(name: 'thumbnail_url')
+  @JsonKey(name: 'thumbnail_url', includeIfNull: false)
   final String? thumbnailUrl;
 
   /// The name of the component.
@@ -62,7 +62,7 @@ class PublishedComponent extends Equatable {
   final User user;
 
   /// The containing frame of the component.
-  @JsonKey(name: 'containing_frame')
+  @JsonKey(name: 'containing_frame', includeIfNull: false)
   final FrameInfo? containingFrame;
 
   @override

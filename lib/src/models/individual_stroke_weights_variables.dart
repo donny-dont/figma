@@ -22,12 +22,16 @@ class IndividualStrokeWeightsVariables extends Equatable {
     Map<String, Object?> json,
   ) => _$IndividualStrokeWeightsVariablesFromJson(json);
 
+  @JsonKey(includeIfNull: false)
   final VariableAlias? top;
 
+  @JsonKey(includeIfNull: false)
   final VariableAlias? bottom;
 
+  @JsonKey(includeIfNull: false)
   final VariableAlias? left;
 
+  @JsonKey(includeIfNull: false)
   final VariableAlias? right;
 
   @override

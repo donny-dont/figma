@@ -15,8 +15,10 @@ class ResponseCursor extends Equatable {
   factory ResponseCursor.fromJson(Map<String, Object?> json) =>
       _$ResponseCursorFromJson(json);
 
+  @JsonKey(includeIfNull: false)
   final num? before;
 
+  @JsonKey(includeIfNull: false)
   final num? after;
 
   @override

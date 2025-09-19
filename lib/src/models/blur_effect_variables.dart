@@ -17,6 +17,7 @@ class BlurEffectVariables extends Equatable {
   factory BlurEffectVariables.fromJson(Map<String, Object?> json) =>
       _$BlurEffectVariablesFromJson(json);
 
+  @JsonKey(includeIfNull: false)
   final VariableAlias? radius;
 
   @override

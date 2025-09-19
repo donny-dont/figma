@@ -20,12 +20,12 @@ class PostComment extends Equatable {
   final String message;
 
   /// The ID of the comment to reply to, if any. This must be a root comment. You cannot reply to other replies (a comment that has a parent_id).
-  @JsonKey(name: 'comment_id')
+  @JsonKey(name: 'comment_id', includeIfNull: false)
   final String? commentId;
 
   /// The position where to place the comment.
   @ClientMetaNullableConverter()
-  @JsonKey(name: 'client_meta')
+  @JsonKey(name: 'client_meta', includeIfNull: false)
   final ClientMeta? clientMeta;
 
   @override

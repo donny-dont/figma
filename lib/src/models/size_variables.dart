@@ -16,8 +16,10 @@ class SizeVariables extends Equatable {
   factory SizeVariables.fromJson(Map<String, Object?> json) =>
       _$SizeVariablesFromJson(json);
 
+  @JsonKey(includeIfNull: false)
   final VariableAlias? x;
 
+  @JsonKey(includeIfNull: false)
   final VariableAlias? y;
 
   @override

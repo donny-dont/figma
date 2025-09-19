@@ -5,6 +5,7 @@ import 'package:meta/meta.dart';
 import 'blur_effect.dart';
 import 'blur_effect_variables.dart';
 import 'blur_type.dart';
+import 'effect_type.dart';
 import 'vector.dart';
 
 part 'progressive_blur_effect.g.dart';
@@ -17,7 +18,7 @@ class ProgressiveBlurEffect extends BlurEffect {
     required super.type,
     required super.visible,
     required super.radius,
-    super.boundVariables = const BlurEffectVariables(),
+    super.boundVariables,
     required this.startRadius,
     required this.startOffset,
     required this.endOffset,
@@ -36,6 +37,7 @@ class ProgressiveBlurEffect extends BlurEffect {
   final Vector endOffset;
 
   /// The string literal 'PROGRESSIVE' representing the blur type. Always check the blurType before reading other properties.
+  @JsonKey(includeToJson: true)
   @override
   BlurType get blurType => BlurType.progressive;
 

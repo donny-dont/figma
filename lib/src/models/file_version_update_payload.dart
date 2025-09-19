@@ -32,6 +32,7 @@ class FileVersionUpdatePayload extends WebhookPayload {
   final DateTime createdAt;
 
   /// Description of the version in the version history
+  @JsonKey(includeIfNull: false)
   final String? description;
 
   /// The key of the file that was updated
@@ -50,6 +51,7 @@ class FileVersionUpdatePayload extends WebhookPayload {
   @JsonKey(name: 'version_id')
   final String versionId;
 
+  @JsonKey(includeToJson: true, name: 'event_type')
   @override
   WebhookEvent get eventType => WebhookEvent.fileVersionUpdate;
 

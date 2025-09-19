@@ -26,7 +26,7 @@ class ProjectFile extends Equatable {
   final String name;
 
   /// The file's thumbnail URL.
-  @JsonKey(name: 'thumbnail_url')
+  @JsonKey(name: 'thumbnail_url', includeIfNull: false)
   final String? thumbnailUrl;
 
   /// The UTC ISO 8601 time at which the file was last modified.

@@ -16,11 +16,11 @@ class ResponsePagination extends Equatable {
       _$ResponsePaginationFromJson(json);
 
   /// A URL that calls the previous page of the response.
-  @JsonKey(name: 'prev_page')
+  @JsonKey(name: 'prev_page', includeIfNull: false)
   final String? prevPage;
 
   /// A URL that calls the next page of the response.
-  @JsonKey(name: 'next_page')
+  @JsonKey(name: 'next_page', includeIfNull: false)
   final String? nextPage;
 
   @override

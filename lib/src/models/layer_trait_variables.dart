@@ -55,42 +55,61 @@ class LayerTraitVariables extends Equatable {
   factory LayerTraitVariables.fromJson(Map<String, Object?> json) =>
       _$LayerTraitVariablesFromJson(json);
 
+  @JsonKey(includeIfNull: false)
   final SizeVariables? size;
 
+  @JsonKey(includeIfNull: false)
   final IndividualStrokeWeightsVariables? individualStrokeWeights;
 
+  @JsonKey(includeIfNull: false)
   final VariableAlias? characters;
 
+  @JsonKey(includeIfNull: false)
   final VariableAlias? itemSpacing;
 
+  @JsonKey(includeIfNull: false)
   final VariableAlias? paddingLeft;
 
+  @JsonKey(includeIfNull: false)
   final VariableAlias? paddingRight;
 
+  @JsonKey(includeIfNull: false)
   final VariableAlias? paddingTop;
 
+  @JsonKey(includeIfNull: false)
   final VariableAlias? paddingBottom;
 
+  @JsonKey(includeIfNull: false)
   final VariableAlias? visible;
 
+  @JsonKey(includeIfNull: false)
   final VariableAlias? topLeftRadius;
 
+  @JsonKey(includeIfNull: false)
   final VariableAlias? topRightRadius;
 
+  @JsonKey(includeIfNull: false)
   final VariableAlias? bottomLeftRadius;
 
+  @JsonKey(includeIfNull: false)
   final VariableAlias? bottomRightRadius;
 
+  @JsonKey(includeIfNull: false)
   final VariableAlias? minWidth;
 
+  @JsonKey(includeIfNull: false)
   final VariableAlias? maxWidth;
 
+  @JsonKey(includeIfNull: false)
   final VariableAlias? minHeight;
 
+  @JsonKey(includeIfNull: false)
   final VariableAlias? maxHeight;
 
+  @JsonKey(includeIfNull: false)
   final VariableAlias? counterAxisSpacing;
 
+  @JsonKey(includeIfNull: false)
   final VariableAlias? opacity;
 
   @JsonKey(defaultValue: [])
@@ -135,6 +154,7 @@ class LayerTraitVariables extends Equatable {
   @JsonKey(defaultValue: [])
   final List<VariableAlias> layoutGrids;
 
+  @JsonKey(includeIfNull: false)
   final RectangleCornerRadiiVariables? rectangleCornerRadii;
 
   @override

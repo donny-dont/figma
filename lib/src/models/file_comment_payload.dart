@@ -56,6 +56,7 @@ class FileCommentPayload extends WebhookPayload {
   @JsonKey(name: 'triggered_by')
   final User triggeredBy;
 
+  @JsonKey(includeToJson: true, name: 'event_type')
   @override
   WebhookEvent get eventType => WebhookEvent.fileComment;
 

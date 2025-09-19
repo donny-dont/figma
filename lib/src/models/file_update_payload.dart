@@ -30,6 +30,7 @@ class FileUpdatePayload extends WebhookPayload {
   @JsonKey(name: 'file_name')
   final String fileName;
 
+  @JsonKey(includeToJson: true, name: 'event_type')
   @override
   WebhookEvent get eventType => WebhookEvent.fileUpdate;
 

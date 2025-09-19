@@ -35,7 +35,7 @@ class FileMeta extends Equatable {
   final String name;
 
   /// The name of the project containing the file.
-  @JsonKey(name: 'folder_name')
+  @JsonKey(name: 'folder_name', includeIfNull: false)
   final String? folderName;
 
   /// The UTC ISO 8601 time at which the file content was last modified.
@@ -46,27 +46,30 @@ class FileMeta extends Equatable {
   final User creator;
 
   /// The user who last modified the file contents.
-  @JsonKey(name: 'last_touched_by')
+  @JsonKey(name: 'last_touched_by', includeIfNull: false)
   final User? lastTouchedBy;
 
   /// A URL to a thumbnail image of the file.
-  @JsonKey(name: 'thumbnail_url')
+  @JsonKey(name: 'thumbnail_url', includeIfNull: false)
   final String? thumbnailUrl;
 
   /// The type of editor associated with this file.
   final EditorType editorType;
 
   /// The role of the user making the API request in relation to the file.
+  @JsonKey(includeIfNull: false)
   final Role? role;
 
   /// Access policy for users who have the link to the file.
-  @JsonKey(name: 'link_access')
+  @JsonKey(name: 'link_access', includeIfNull: false)
   final LinkAccess? linkAccess;
 
   /// The URL of the file.
+  @JsonKey(includeIfNull: false)
   final String? url;
 
   /// The version number of the file. This number is incremented when a file is modified and can be used to check if the file has changed between requests.
+  @JsonKey(includeIfNull: false)
   final String? version;
 
   @override
