@@ -111,6 +111,33 @@ const List<String> _allowList = <String>[
   'SizeVariables',
   'IndividualStrokeWeightsVariables',
   'RectangleCornerRadiiVariables',
+
+  'Paint',
+  'PaintType',
+  'SolidPaint',
+  'SolidPaintVariables',
+  'GradientPaint',
+  'Vector',
+  'ColorStop',
+  'ColorStopVariables',
+  'ImagePaint',
+  'ScaleMode',
+  'Transform',
+  'ImageFilters',
+  'PatternPaint',
+  'PatternAlignment',
+  'TileType',
+
+  'HasLayoutTrait',
+  'LayoutConstraint',
+  'HorizontalConstraint',
+  'VerticalConstraint',
+  'GridChildAlign',
+  'LayoutAlign',
+  'LayoutGrow',
+  'LayoutSizing',
+  'LayoutPositioning',
+  'Rectangle',
 ];
 
 bool allowed(TypeDefinition definition) => _allowList.contains(definition.name);

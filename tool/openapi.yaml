@@ -2917,27 +2917,13 @@ components:
             for auto-layout frames or direct children of auto-layout frames.
           default: 0
         layoutSizingHorizontal:
-          type: string
+          $ref: "#/components/schemas/LayoutSizing"
           description: |-
             The horizontal sizing setting on this auto-layout frame or frame child.
-            - `FIXED`
-            - `HUG`: only valid on auto-layout frames and text nodes
-            - `FILL`: only valid on auto-layout frame children
-          enum:
-            - FIXED
-            - HUG
-            - FILL
         layoutSizingVertical:
-          type: string
+          $ref: "#/components/schemas/LayoutSizing"
           description: |-
             The vertical sizing setting on this auto-layout frame or frame child.
-            - `FIXED`
-            - `HUG`: only valid on auto-layout frames and text nodes
-            - `FILL`: only valid on auto-layout frame children
-          enum:
-            - FIXED
-            - HUG
-            - FILL
         gridRowCount:
           type: number
           description: 'The number of rows in the grid layout. This property is only
@@ -2967,27 +2953,17 @@ components:
             is only applicable for auto-layout frames with `layoutMode:
             "GRID"`.'
         gridChildHorizontalAlign:
-          type: string
+          $ref: "#/components/schemas/GridChildAlign"
           description: "Determines how a GRID frame's child should be aligned in the
             horizontal direction within its grid area. This property is only
             applicable for direct children of frames with `layoutMode:
             \"GRID\"`."
-          enum:
-            - AUTO
-            - MIN
-            - CENTER
-            - MAX
         gridChildVerticalAlign:
-          type: string
+          $ref: "#/components/schemas/GridChildAlign"
           description: "Determines how a GRID frame's child should be aligned in the
             vertical direction within its grid area. This property is only
             applicable for direct children of frames with `layoutMode:
             \"GRID\"`."
-          enum:
-            - AUTO
-            - MIN
-            - CENTER
-            - MAX
         gridRowSpan:
           type: number
           description: "The number of rows that a GRID frame's child should span. This
@@ -3015,6 +2991,27 @@ components:
       required:
         - absoluteBoundingBox
         - absoluteRenderBounds
+    LayoutSizing:
+      type: string
+      description: |-
+        The sizing setting on this auto-layout frame or frame child.
+        - `FIXED`
+        - `HUG`: only valid on auto-layout frames and text nodes
+        - `FILL`: only valid on auto-layout frame children
+      enum:
+        - FIXED
+        - HUG
+        - FILL
+    GridChildAlign:
+      type: string
+      description: "Determines how a GRID frame's child should be aligned within its
+        grid area. This property is only applicable for direct children of frames with `layoutMode:
+        \"GRID\"`."
+      enum:
+        - AUTO
+        - MIN
+        - CENTER
+        - MAX
     HasFramePropertiesTrait:
       type: object
       properties:
@@ -4509,6 +4506,23 @@ components:
         shadows:
           type: number
           default: 0
+    Paint:
+      oneOf:
+        - $ref: "#/components/schemas/SolidPaint"
+        - $ref: "#/components/schemas/GradientPaint"
+        - $ref: "#/components/schemas/ImagePaint"
+        - $ref: "#/components/schemas/PatternPaint"
+      discriminator:
+        propertyName: type
+        x-dart-type: PaintType
+        mapping:
+          SOLID: "#/components/schemas/SolidPaint"
+          GRADIENT_LINEAR: "#/components/schemas/GradientPaint"
+          GRADIENT_RADIAL: "#/components/schemas/GradientPaint"
+          GRADIENT_ANGULAR: "#/components/schemas/GradientPaint"
+          GRADIENT_DIAMOND: "#/components/schemas/GradientPaint"
+          IMAGE: "#/components/schemas/ImagePaint"
+          PATTERN: "#/components/schemas/PatternPaint"
     BasePaint:
       type: object
       properties:
@@ -4561,6 +4575,7 @@ components:
           properties:
             type:
               type: string
+              $ref: "#/components/schemas/EffectType"
               description: The string literal representing the paint's type. Always check the
                 `type` before reading other properties.
               enum:
@@ -4671,19 +4686,11 @@ components:
               $ref: "#/components/schemas/Vector"
               description: The spacing for the pattern
             horizontalAlignment:
-              type: string
+              $ref: "#/components/schemas/PatternAlignment"
               description: The horizontal alignment for the pattern
-              enum:
-                - START
-                - CENTER
-                - END
             verticalAlignment:
-              type: string
+              $ref: "#/components/schemas/PatternAlignment"
               description: The vertical alignment for the pattern
-              enum:
-                - START
-                - CENTER
-                - END
           required:
             - type
             - sourceNodeId
@@ -4693,18 +4700,19 @@ components:
             - horizontalAlignment
             - verticalAlignment
         - $ref: "#/components/schemas/BasePaint"
-    Paint:
-      oneOf:
-        - $ref: "#/components/schemas/SolidPaint"
-        - $ref: "#/components/schemas/GradientPaint"
-        - $ref: "#/components/schemas/ImagePaint"
-        - $ref: "#/components/schemas/PatternPaint"
+    PatternAlignment:
+      type: string
+      enum:
+        - START
+        - CENTER
+        - END
     LayoutConstraint:
       type: object
       description: Layout constraint relative to containing Frame
       properties:
         vertical:
           type: string
+          x-dart-type: VerticalConstraint
           description: |-
             Vertical constraint (relative to containing frame) as an enum:
 
@@ -4721,6 +4729,7 @@ components:
             - SCALE
         horizontal:
           type: string
+          x-dart-type: HorizontalConstraint
           description: |-
             Horizontal constraint (relative to containing frame) as an enum:
 

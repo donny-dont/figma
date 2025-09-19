@@ -98,6 +98,7 @@ const _discriminatorTypes = <String, String>{
   'ShadowEffect': 'BaseShadowEffect',
   'BlurEffect': 'BaseBlurEffect',
   'NoiseEffect': 'BaseNoiseEffect',
+  'Paint': 'BasePaint',
 };
 
 void addDiscriminatorTypes(
