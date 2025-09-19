@@ -85,27 +85,25 @@ const List<String> _allowList = <String>[
   'DevResource',
   'CommentFragment',
 
-  //'Effect',
+  'Effect',
   'EffectType',
-  //'ShadowEffect',
-  //'DropShadowEffect',
-  //'InnerShadowEffect',
+  'ShadowEffect',
+  'DropShadowEffect',
+  'InnerShadowEffect',
   'BlendMode',
-  //'ShadowEffectVariables',
+  'ShadowEffectVariables',
 
   'BlurEffect',
   'BlurType',
   'BlurEffectVariables',
   'NormalBlurEffect',
   'ProgressiveBlurEffect',
-/*
   'TextureEffect',
   'NoiseEffect',
-  'NoiseEffectNoiseType',
+  'NoiseType',
   'MonotoneNoiseEffect',
   'MultitoneNoiseEffect',
   'DuotoneNoiseEffect',
-  */
 ];
 
 bool allowed(TypeDefinition definition) => _allowList.contains(definition.name);

@@ -21,7 +21,7 @@ void addDiscriminator(String name, JsonMap definitions) {
 
   final propertyName = discriminator.property;
   final discriminatorType =
-      discriminator.discriminatorType ??
+      discriminator.typeOverride ??
       '${name.toPascalCase()}${propertyName.toPascalCase()}';
 
   for (final value in definition.oneOf) {
@@ -53,7 +53,8 @@ void addDiscriminator(String name, JsonMap definitions) {
       continue;
     }
 
-    property.discriminatorType = discriminatorType;
+    property[r'$ref'] = '#/components/schemas/$discriminatorType';
+    print(property);
   }
 }
 
@@ -96,6 +97,7 @@ void addTypeOverrides(JsonMap document, {String property = 'type'}) {
 const _discriminatorTypes = <String, String>{
   'ShadowEffect': 'BaseShadowEffect',
   'BlurEffect': 'BaseBlurEffect',
+  'NoiseEffect': 'BaseNoiseEffect',
 };
 
 void addDiscriminatorTypes(

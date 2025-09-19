@@ -60,13 +60,10 @@ extension ClassHierarchy on ClassDefinition {
     }
   }
 
-  bool _isField(PropertyDefinition definition) {
-    if (definition is! DiscriminatorDefinition) {
-      return true;
-    }
+  Iterable<PropertyDefinition> get getters =>
+      properties.where((d) => !_isField(d));
 
-    return definition.defaultsTo == null;
-  }
+  bool _isField(PropertyDefinition definition) => !definition.singleValue;
 
   /// Function used to check if a type is a mixin.
   static bool Function(TypeDefinition) mixinCheck = _none;

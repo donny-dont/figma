@@ -1,14 +1,11 @@
-import 'package:change_case/change_case.dart';
 import 'package:code_builder/code_builder.dart' as code;
 import 'package:collection/collection.dart';
-import 'package:json_annotation/json_annotation.dart';
 import 'package:path/path.dart' as p;
 
 import 'annotate.dart' as annotate;
-import 'naming.dart';
+import 'hierarchy.dart';
 import 'parse.dart';
 import 'reference.dart' as reference;
-import 'hierarchy.dart';
 
 final RegExp _traitMatch = RegExp(r'[A-Za-z]+Traits?$');
 
@@ -128,10 +125,17 @@ code.Spec classSpec(ClassDefinition value) {
       ])
       ..fields.addAll(<code.Field>[
         //...value.mixinProperties.map(_fieldMixinPropertySpec),
-        ...value.properties.map(_fieldClassPropertySpec),
+        ...value.fields.map(_fieldClassPropertySpec),
       ])
       ..methods.addAll(<code.Method>[
-        if (hasDiscriminator) _getterPropertySpec(discriminator),
+        if (hasDiscriminator) _getterPropertySpec()(discriminator),
+        ...value.getters.map(
+          _getterPropertySpec(
+            annotateWith: [
+              if (extend != reference.equatable) annotate.override,
+            ],
+          ),
+        ),
         code.Method(
           (m) => m
             ..returns = reference.props
@@ -280,16 +284,25 @@ code.Class _mixinSpec(ClassDefinition value) => code.Class(
     ..abstract = true
     ..mixin = true
     ..implements.addAll(value.implements.map(reference.type))
-    ..methods.addAll(value.properties.map(_getterPropertySpec)),
+    ..methods.addAll(value.properties.map(_getterPropertySpec())),
 );
 
-code.Method _getterPropertySpec(PropertyDefinition value) => code.Method(
-  (m) => m
-    ..name = value.name
-    ..docs.addAll(value.description.toDocumentation)
-    ..type = code.MethodType.getter
-    ..returns = typeSpec(value.type),
-);
+typedef _ClassGetterMapper = code.Method Function(PropertyDefinition);
+
+_ClassGetterMapper _getterPropertySpec({
+  List<code.Expression> annotateWith = const <code.Expression>[],
+}) =>
+    (value) => code.Method(
+      (m) => m
+        ..name = value.name
+        ..annotations.addAll(annotateWith)
+        ..docs.addAll(value.description.toDocumentation)
+        ..type = code.MethodType.getter
+        ..body = value.singleValue
+            ? _parameterDefault(value.type, value.defaultsTo!).code
+            : null
+        ..returns = typeSpec(value.type),
+    );
 
 code.Spec enumSpec(EnumDefinition value) => code.Enum(
   (e) => e

@@ -67,14 +67,22 @@ extension OverrideEnumerationNames on JsonMap {
 extension PropertyDiscriminatorType on JsonMap {
   static const String _key = 'x-dart-discriminator';
 
+  bool get createType => this[_key] as bool? ?? true;
+
   /// Whether the property is a discriminator.
-  bool get isDiscriminatorType => containsKey(_key);
+  //bool get isDiscriminatorType => containsKey(_key);
 
   /// The type of the discriminator; if present.
-  String? get discriminatorType => this[_key] as String?;
-  set discriminatorType(String? value) {
-    putOrRemove(_key, value);
-  }
+  //String? get discriminatorType => this[_key] as String?;
+  //set discriminatorType(String? value) {
+  //  putOrRemove(_key, value);
+  //}
+}
+
+extension ImplementsType on JsonMap {
+  static const String _key = 'x-dart-implements';
+
+  List<String> get implements => getList(_key);
 }
 
 extension OverrideMapping on JsonMap {

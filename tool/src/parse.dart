@@ -112,7 +112,7 @@ class DefinitionContext {
   TypeDefinition _allOf(String name, JsonMap definition) {
     _logger.fine('adding class definition associated with $name');
 
-    final implements = <Type>[];
+    final implements = definition.implements.map(_typeFromName).toList();
     final properties = <PropertyDefinition>[];
 
     for (final value in definition.allOf) {
@@ -159,25 +159,33 @@ class DefinitionContext {
 
     // Add enumeration for the discriminator
     final discriminator = definition.discriminator;
-    final mapping = discriminator.mapping;
-    final enumerationValues = mapping.keys.toList();
-    final enumerationNames = discriminator.hasEnumerationNames
-        ? definition.enumerationNames
-        : enumerationValues.cast<String>().map((v) => v.toCamelCase()).toList();
     final property = discriminator.property;
+    final mapping = discriminator.hasMappingOverride
+        ? discriminator.mappingOverride
+        : discriminator.mapping;
 
     final enumerationName =
-        discriminator.discriminatorType ??
+        discriminator.typeOverride ??
         '${name.toPascalCase()}${property.toPascalCase()}';
 
-    _storeTypeDefinition(
-      enumerationName,
-      EnumDefinition(
-        context: this,
-        name: enumerationName,
-        values: _enumValues(enumerationNames, enumerationValues),
-      ),
-    );
+    if (discriminator.createType) {
+      final enumerationValues = mapping.keys.toList();
+      final enumerationNames = discriminator.hasEnumerationNames
+          ? definition.enumerationNames
+          : enumerationValues
+                .cast<String>()
+                .map((v) => v.toCamelCase())
+                .toList();
+
+      _storeTypeDefinition(
+        enumerationName,
+        EnumDefinition(
+          context: this,
+          name: enumerationName,
+          values: _enumValues(enumerationNames, enumerationValues),
+        ),
+      );
+    }
 
     final dartType = definition.dartType(name);
 
@@ -185,6 +193,7 @@ class DefinitionContext {
       context: this,
       name: dartType,
       description: definition.description,
+      implements: definition.implements.map(_typeFromName).toList(),
       properties: _properties(definition.dartObject).toList(),
       discriminator: DiscriminatorDefinition(
         name: property.dartName,
@@ -250,6 +259,7 @@ class DefinitionContext {
     return ClassDefinition(
       context: this,
       name: definition.dartType(name),
+      implements: definition.implements.map(_typeFromName).toList(),
       description: definition.description,
       properties: _properties(definition).toList(),
     );
@@ -313,18 +323,29 @@ class DefinitionContext {
   }) {
     _logger.finer('adding property definition associated with $name');
 
-    late final Type type;
-    final isDiscriminator = definition.isDiscriminatorType;
+    Object? defaultsTo;
+    var singleValue = false;
+    if (definition.isEnumeration) {
+      final enumerations = definition.enumerations;
+      if (enumerations.length == 1) {
+        defaultsTo = enumerations[0];
+        _logger.finer(
+          'property is an enumeration with a '
+          'single value ($defaultsTo)',
+        );
 
-    if (isDiscriminator) {
-      type = Type(context: this, referenceName: definition.discriminatorType!);
-    } else {
-      type = _type(name, definition);
+        // Remove the enumeration
+        definition.remove('enum');
+
+        singleValue = true;
+      }
     }
 
+    final type = _type(name, definition);
+    _logger.finest('property type is ${type.referenceName}');
+
     var isNullable = false;
-    Object? defaultsTo;
-    if (!required) {
+    if (!required && defaultsTo == null) {
       if (type.isList) {
         defaultsTo = [];
       } else if (type.isMap) {
@@ -341,10 +362,12 @@ class DefinitionContext {
       serializedName: name,
       type: isNullable ? type.nullable() : type,
       isDeprecated: deprecated,
-      isDiscriminator: isDiscriminator,
       defaultsTo: defaultsTo,
+      singleValue: singleValue,
     );
   }
+
+  Type _typeFromName(String name) => Type(context: this, referenceName: name);
 
   Type _type(String name, JsonMap definition) {
     late final String referenceName;
@@ -495,6 +518,7 @@ final class PropertyDefinition extends Definition {
     this.isDeprecated = false,
     this.isDiscriminator = false,
     this.defaultsTo,
+    this.singleValue = false,
   });
 
   /// The name of the property.
@@ -514,6 +538,8 @@ final class PropertyDefinition extends Definition {
 
   /// The value the property should default to.
   final Object? defaultsTo;
+
+  final bool singleValue;
 }
 
 @immutable
