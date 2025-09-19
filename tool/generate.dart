@@ -104,6 +104,13 @@ const List<String> _allowList = <String>[
   'MonotoneNoiseEffect',
   'MultitoneNoiseEffect',
   'DuotoneNoiseEffect',
+
+  'IsLayerTrait',
+  'ScrollBehavior',
+  'LayerTraitVariables',
+  'SizeVariables',
+  'IndividualStrokeWeightsVariables',
+  'RectangleCornerRadiiVariables',
 ];
 
 bool allowed(TypeDefinition definition) => _allowList.contains(definition.name);

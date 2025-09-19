@@ -1,4 +1,5 @@
 import 'package:code_builder/code_builder.dart' as code;
+import 'package:collection/collection.dart';
 import 'package:logging/logging.dart';
 
 import 'parse.dart';
@@ -62,6 +63,29 @@ extension ClassHierarchy on ClassDefinition {
 
   Iterable<PropertyDefinition> get getters =>
       properties.where((d) => !_isField(d));
+
+  Iterable<PropertyDefinition> get props sync* {
+    final discriminatorValue = discriminator;
+    if (discriminatorValue != null) {
+      yield discriminatorValue;
+    }
+
+    final extending = extend;
+    final superProps = extending != null
+        ? extending.props
+        : Iterable<PropertyDefinition>.empty();
+
+    final allProperties = <PropertyDefinition>[
+      ...properties,
+      ...mixins.expand((m) => m.properties),
+    ];
+
+    for (final property in allProperties) {
+      if (superProps.firstWhereOrNull((p) => p.name == property.name) == null) {
+        yield property;
+      }
+    }
+  }
 
   bool _isField(PropertyDefinition definition) => !definition.singleValue;
 

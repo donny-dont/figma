@@ -2673,7 +2673,7 @@ components:
           properties:
             size:
               type: object
-              x-dart-type: SizeVariableAlias
+              x-dart-type: SizeVariables
               properties:
                 x:
                   $ref: "#/components/schemas/VariableAlias"
@@ -2681,6 +2681,7 @@ components:
                   $ref: "#/components/schemas/VariableAlias"
             individualStrokeWeights:
               type: object
+              x-dart-type: IndividualStrokeWeightsVariables
               properties:
                 top:
                   $ref: "#/components/schemas/VariableAlias"
@@ -2782,6 +2783,7 @@ components:
                 $ref: "#/components/schemas/VariableAlias"
             rectangleCornerRadii:
               type: object
+              x-dart-type: RectangleCornerRadiiVariables
               properties:
                 RECTANGLE_TOP_LEFT_CORNER_RADIUS:
                   x-dart-name: topLeft

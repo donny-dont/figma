@@ -66,6 +66,10 @@ code.Spec schemaSpec(TypeDefinition value) => switch (value) {
 code.Spec classSpec(ClassDefinition value) {
   ClassHierarchy.mixinCheck = isMixin;
 
+  if (value.isMixin) {
+    return _mixinSpec(value);
+  }
+
   final dartName = value.name;
   final extend = value.extendReference ?? reference.equatable;
 
@@ -80,12 +84,14 @@ code.Spec classSpec(ClassDefinition value) {
   final discriminator = value.discriminator;
   final hasDiscriminator = discriminator != null;
 
+  final fields = value.fields;
+
   return code.Class(
     (c) => c
       ..name = dartName
       ..annotations.addAll(<code.Expression>[
         annotate.jsonSerializable(jsonSerializableArguments),
-        annotate.copyWith,
+        if (value.fields.isNotEmpty) annotate.copyWith,
         annotate.immutable,
       ])
       ..docs.addAll(value.description.toDocumentation)
@@ -97,11 +103,8 @@ code.Spec classSpec(ClassDefinition value) {
           (c) => c
             ..constant = true
             ..optionalParameters.addAll(<code.Parameter>[
-              //...value.superProperties.map(_constructorSuperParameterSpec),
-              //...value.mixinProperties.map(_constructorThisParameterSpec),
-              //...value.implementedProperties.map(_constructorThisParameterSpec),
               ...value.superFields.map(_constructorSuperParameterSpec),
-              ...value.fields.map(_constructorThisParameterSpec),
+              ...fields.map(_constructorThisParameterSpec),
             ]),
         ),
         code.Constructor(
@@ -124,8 +127,7 @@ code.Spec classSpec(ClassDefinition value) {
         ),
       ])
       ..fields.addAll(<code.Field>[
-        //...value.mixinProperties.map(_fieldMixinPropertySpec),
-        ...value.fields.map(_fieldClassPropertySpec),
+        ...fields.map(_fieldClassPropertySpec),
       ])
       ..methods.addAll(<code.Method>[
         if (hasDiscriminator) _getterPropertySpec()(discriminator),
@@ -145,9 +147,7 @@ code.Spec classSpec(ClassDefinition value) {
             ..body = code.literalList(<Object>[
               if (extend != reference.equatable)
                 code.refer('super').property('props').spread,
-              //...value.mixinProperties.map(_propsReference),
-              //...value.implementedProperties.map(_propsReference),
-              ...value.properties.map(_propsReference),
+              ...value.props.map(_propsReference),
             ], reference.objectNullable).code,
         ),
         code.Method(
