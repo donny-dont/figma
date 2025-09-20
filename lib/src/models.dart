@@ -12,6 +12,7 @@ export 'models/component_property_definition.dart';
 export 'models/component_property_type.dart';
 export 'models/component_set.dart';
 export 'models/constraint.dart';
+export 'models/constraint_type.dart';
 export 'models/counter_axis_align_items.dart';
 export 'models/counter_axis_sizing_mode.dart';
 export 'models/dev_mode_status.dart';
