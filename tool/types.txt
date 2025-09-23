@@ -1,0 +1,60 @@
+AnnotationsTrait
+ComponentPropertiesTrait
+CornerTrait
+DevStatusTrait
+HasBlendModeAndOpacityTrait
+HasEffectsTrait
+HasExportSettingsTrait
+HasFramePropertiesTrait
+HasGeometryTrait
+HasLayoutTrait
+HasMaskTrait
+HasTextSublayerTrait
+IndividualStrokesTrait
+IsLayerTrait
+MinimalFillsTrait
+MinimalStrokesTrait
+TextPathPropertiesTrait
+TransitionSourceTrait
+TypePropertiesTrait
+HasChildrenTrait
+
+# DevStatusTrait
+DevStatus
+
+# HasFramePropertiesTrait
+LayoutWrap
+CounterAxisAlignContent
+
+# HasLayoutTrait
+LayoutGrow
+LayoutSizing
+GridChildAlign
+
+# HasMaskTrait
+MaskType
+
+# IsLayerTrait
+ScrollBehavior
+LayerTraitVariables
+SizeVariables
+IndividualStrokeWeightsVariables
+RectangleCornerRadiiVariables
+
+# TextPathPropertiesTrait
+TextPathTypeStyle
+BaseTypeStyle
+Hyperlink
+HyperlinkType
+SemanticWeight
+SemanticItalic
+TextPathTypeStyleVariables
+
+# TransitionSourceTrait
+#Interaction
+
+
+FrameTraits
+DefaultShapeTraits
+CornerRadiusShapeTraits
+RectangularShapeTraits

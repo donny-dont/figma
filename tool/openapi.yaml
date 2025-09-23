@@ -3309,6 +3309,7 @@ components:
             from 0 to 1. 0 is the default and means that the corner is perfectly
             circular. A value of 0.6 means the corner matches the iOS 7
             "squircle" icon shape. Other values produce various other curves.
+          default: 0
         rectangleCornerRadii:
           type: array
           items:
@@ -3399,6 +3400,7 @@ components:
           type: array
           items:
             type: string
+            x-dart-type: LineType
             enum:
               - NONE
               - ORDERED
@@ -3496,17 +3498,19 @@ components:
             status applied to it.
           properties:
             type:
-              type: string
-              enum:
-                - NONE
-                - READY_FOR_DEV
-                - COMPLETED
+              $ref: "#/components/schemas/DevModeStatus"
             description:
               type: string
               description: An optional field where the designer can add more information about
                 the design and what has changed.
           required:
             - type
+    DevModeStatus:
+      type: string
+      enum:
+        - NONE
+        - READY_FOR_DEV
+        - COMPLETED
     AnnotationsTrait:
       type: object
       properties: {}
@@ -3748,6 +3752,7 @@ components:
                 "BOOLEAN_OPERATION"
             booleanOperation:
               type: string
+              x-dart-type: Operation
               description: A string enum indicating the type of boolean operation applied.
               enum:
                 - UNION
@@ -4237,6 +4242,7 @@ components:
         - b
     RGBA:
       type: object
+      x-dart-type: Color
       description: An RGBA color
       properties:
         r:
@@ -4308,6 +4314,7 @@ components:
           type: string
         rotation:
           type: string
+          x-dart-type: PrototypeDeviceRotation
           enum:
             - NONE
             - CCW_90
@@ -4344,6 +4351,7 @@ components:
           type: string
         format:
           type: string
+          x-dart-type: ExportFormat
           enum:
             - JPG
             - PNG
@@ -4412,6 +4420,7 @@ components:
         - LUMINOSITY
     Vector:
       type: object
+      x-dart-type: Vector2D
       description: A 2d vector.
       properties:
         x:
@@ -4749,6 +4758,7 @@ components:
         - horizontal
     Rectangle:
       type: object
+      x-dart-type: SizeRectangle
       description: A rectangle that expresses a bounding box in absolute coordinates.
       properties:
         x:
@@ -4774,6 +4784,7 @@ components:
       properties:
         pattern:
           type: string
+          x-dart-type: LayoutGridPattern
           description: |-
             Orientation of the grid as a string enum
 
@@ -4795,6 +4806,7 @@ components:
           description: Color of the grid
         alignment:
           type: string
+          x-dart-type: LayoutGridAlignment
           description: |-
             Positioning of grid as a string enum
 
@@ -5551,6 +5563,7 @@ components:
           $ref: "#/components/schemas/ComponentPropertyType"
           description: Type of this component property.
         defaultValue:
+          x-dart-type: Object
           oneOf:
             - type: boolean
             - type: string
@@ -5578,6 +5591,7 @@ components:
           $ref: "#/components/schemas/ComponentPropertyType"
           description: Type of this component property.
         value:
+          x-dart-type: Object
           oneOf:
             - type: boolean
             - type: string
@@ -6252,6 +6266,7 @@ components:
         - EXPRESSION
     VariableResolvedDataType:
       type: string
+      x-dart-type: ResolvedType
       description: Defines the types of data a VariableData object can eventually equal
       enum:
         - BOOLEAN
@@ -6808,8 +6823,13 @@ components:
           deprecated: true
         context:
           type: string
+          x-dart-type: WebhookContext
           description: The type of context this webhook is attached to. The value will be
             "PROJECT", "TEAM", or "FILE"
+          enum:
+            - PROJECT
+            - TEAM
+            - FILE
         context_id:
           type: string
           description: The ID of the context this webhook is attached to
@@ -7242,7 +7262,7 @@ components:
               description: An array of related links that have been applied to the layer in
                 the file
             status:
-              type: string
+              $ref: "#/components/schemas/DevModeStatus"
               description: The Dev Mode status. Either "NONE", "READY_FOR_DEV", or "COMPLETED"
             triggered_by:
               $ref: "#/components/schemas/User"
@@ -7255,6 +7275,15 @@ components:
             - related_links
             - status
             - triggered_by
+    EditorType:
+      type: string
+      enum:
+        - figma
+        - figjam
+        - slides
+        - buzz
+        - sites
+        - make
     ActivityLogUserEntity:
       type: object
       description: A Figma user
@@ -7294,11 +7323,8 @@ components:
           type: string
           description: Name of the file.
         editor_type:
-          type: string
+          $ref: "#/components/schemas/EditorType"
           description: Indicates if the object is a file on Figma Design or FigJam.
-          enum:
-            - figma
-            - figjam
         link_access:
           type: string
           description: Access policy for users who have the link to the file.
@@ -7439,12 +7465,9 @@ components:
           type: string
           description: Name of the plugin.
         editor_type:
-          type: string
+          $ref: "#/components/schemas/EditorType"
           description: Indicates if the object is a plugin is available on Figma Design or
             FigJam.
-          enum:
-            - figma
-            - figjam
       required:
         - type
         - id
@@ -7466,12 +7489,9 @@ components:
           type: string
           description: Name of the widget.
         editor_type:
-          type: string
+          $ref: "#/components/schemas/EditorType"
           description: Indicates if the object is a widget available on Figma Design or
             FigJam.
-          enum:
-            - figma
-            - figjam
       required:
         - type
         - id
@@ -8598,10 +8618,7 @@ components:
                 format: date-time
                 description: The UTC ISO 8601 time at which the file was last modified.
               editorType:
-                type: string
-                enum:
-                  - figma
-                  - figjam
+                $ref: "#/components/schemas/EditorType"
                 description: The type of editor associated with this file.
               thumbnailUrl:
                 type: string
@@ -8697,10 +8714,7 @@ components:
                 format: date-time
                 description: The UTC ISO 8601 time at which the file was last modified.
               editorType:
-                type: string
-                enum:
-                  - figma
-                  - figjam
+                $ref: "#/components/schemas/EditorType"
                 description: The type of editor associated with this file.
               thumbnailUrl:
                 type: string
@@ -8833,14 +8847,7 @@ components:
                 type: string
                 description: A URL to a thumbnail image of the file.
               editorType:
-                type: string
-                enum:
-                  - figma
-                  - figjam
-                  - slides
-                  - buzz
-                  - sites
-                  - make
+                $ref: "#/components/schemas/EditorType"
                 description: The type of editor associated with this file.
               role:
                 type: string
@@ -8933,6 +8940,7 @@ components:
         application/json:
           schema:
             type: object
+            x-dart-type: VersionsResponse
             properties:
               versions:
                 type: array

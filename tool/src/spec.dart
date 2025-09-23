@@ -3,6 +3,7 @@ import 'package:collection/collection.dart';
 import 'package:path/path.dart' as p;
 
 import 'annotate.dart' as annotate;
+import 'documentation.dart';
 import 'hierarchy.dart';
 import 'parse.dart';
 import 'reference.dart' as reference;
@@ -10,7 +11,7 @@ import 'reference.dart' as reference;
 final RegExp _traitMatch = RegExp(r'[A-Za-z]+Traits?$');
 
 bool isMixin(TypeDefinition definition) =>
-    _traitMatch.hasMatch(definition.name);
+    _traitMatch.hasMatch(definition.name) || definition.name == 'BaseTypeStyle';
 
 extension FinalType on Type {
   TypeDefinition get finalDefinition {
@@ -19,18 +20,6 @@ extension FinalType on Type {
     return intermediary is TypeAliasDefinition
         ? intermediary.alias.finalDefinition
         : intermediary;
-  }
-}
-
-extension on String {
-  Iterable<String> get toDocumentation {
-    final trimmed = trim();
-
-    if (trimmed.isEmpty) {
-      return const <String>[];
-    }
-
-    return trimmed.split('\n').map((s) => '/// $s');
   }
 }
 
@@ -151,7 +140,7 @@ code.Spec classSpec(ClassDefinition value) {
         if (value.fields.isNotEmpty && !isAbstract) annotate.copyWith,
         annotate.immutable,
       ])
-      ..docs.addAll(value.description.toDocumentation)
+      ..docs.addAll(value.toDocumentation)
       ..abstract = isAbstract
       ..extend = extend
       ..mixins.addAll(value.mixinReferences)
@@ -318,7 +307,7 @@ _ClassFieldMapper _fieldPropertySpec({
   }
 
   final docs = !annotateWith.contains(annotate.override)
-      ? value.description.toDocumentation
+      ? value.toDocumentation
       : <String>[];
 
   return code.Field(
@@ -337,7 +326,7 @@ _ClassFieldMapper _fieldPropertySpec({
 code.Class _mixinSpec(ClassDefinition value) => code.Class(
   (c) => c
     ..name = value.name
-    ..docs.addAll(value.description.toDocumentation)
+    ..docs.addAll(value.toDocumentation)
     ..abstract = true
     ..mixin = true
     ..implements.addAll(value.implements.map(reference.type))
@@ -370,7 +359,7 @@ _ClassGetterMapper _getterPropertySpec({
         if (arguments.isNotEmpty) annotate.jsonKey(arguments),
         ...annotateWith,
       ])
-      ..docs.addAll(value.description.toDocumentation)
+      ..docs.addAll(value.toDocumentation)
       ..type = code.MethodType.getter
       ..body = value.singleValue
           ? _parameterDefault(value.type, value.defaultsTo!).code
@@ -382,7 +371,7 @@ _ClassGetterMapper _getterPropertySpec({
 code.Spec enumSpec(EnumDefinition value) => code.Enum(
   (e) => e
     ..name = value.name
-    ..docs.addAll(value.description.toDocumentation)
+    ..docs.addAll(value.toDocumentation)
     ..values.addAll(value.values.map(_enumValue)),
 );
 
@@ -395,8 +384,8 @@ code.EnumValue _enumValue(EnumValueDefinition value) => code.EnumValue(
 code.Spec typeAliasSpec(TypeAliasDefinition value) => code.TypeDef(
   (t) => t
     ..name = value.name
-    ..docs.addAll(value.description.toDocumentation)
-    ..definition = value.alias.definition.refer,
+    ..docs.addAll(value.toDocumentation)
+    ..definition = value.alias.definition.referWithArguments,
 );
 
 code.Code _discriminatorConstructorBody(DiscriminatorDefinition property) {

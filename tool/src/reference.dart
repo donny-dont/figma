@@ -1,6 +1,7 @@
 import 'package:change_case/change_case.dart';
 import 'package:code_builder/code_builder.dart' as code;
 import 'package:collection/collection.dart';
+import 'package:test/test.dart';
 
 import 'parse.dart';
 
@@ -70,6 +71,26 @@ extension TypeReference on TypeDefinition {
   }
 
   code.Reference get refer => code.refer(name, dartFile);
+
+  code.Reference get referWithArguments {
+    final typeArgument = this.type.typeArgument;
+    final typeArguments = <code.Reference>[];
+
+    if (typeArgument != null) {
+      if (this.type.isMap) {
+        typeArguments.add(code.refer('String'));
+      }
+
+      typeArguments.add(typeArgument.definition.refer);
+    }
+
+    return code.TypeReference(
+      (t) => t
+        ..symbol = name
+        ..url = dartFile
+        ..types.addAll(typeArguments),
+    );
+  }
 }
 
 extension PropertyReference on PropertyDefinition {
