@@ -46,11 +46,37 @@ code.TypeReference list(code.Reference value) => code.TypeReference(
     ..types.add(value),
 );
 
-code.Reference type(Type value) => value.definition.refer;
+code.Reference referType(Type value) {
+  final typeArgument = value.typeArgument;
+  final typeArguments = <code.Reference>[];
 
-extension TypeReference on TypeDefinition {
-  String? get dartFileWithoutExtension =>
-      !this.type.isBuiltin ? name.toSnakeCase() : null;
+  if (typeArgument != null) {
+    if (value.isMap) {
+      typeArguments.add(code.refer('String'));
+    }
+
+    typeArguments.add(referType(typeArgument));
+  }
+
+  final definition = value.definition;
+
+  return code.TypeReference(
+    (t) => t
+      ..symbol = definition.name
+      ..url = definition.dartFile
+      ..types.addAll(typeArguments),
+  );
+}
+
+extension TypeDefinitionReference on TypeDefinition {
+  String? get dartFileWithoutExtension {
+    if (type.isBuiltin) {
+      return null;
+    }
+
+    // Special naming cases
+    return type.name == 'Vector2D' ? 'vector_2d' : name.toSnakeCase();
+  }
 
   String? get dartFile {
     final base = dartFileWithoutExtension;
@@ -70,27 +96,7 @@ extension TypeReference on TypeDefinition {
     return '$base.g.dart';
   }
 
-  code.Reference get refer => code.refer(name, dartFile);
-
-  code.Reference get referWithArguments {
-    final typeArgument = this.type.typeArgument;
-    final typeArguments = <code.Reference>[];
-
-    if (typeArgument != null) {
-      if (this.type.isMap) {
-        typeArguments.add(code.refer('String'));
-      }
-
-      typeArguments.add(typeArgument.definition.refer);
-    }
-
-    return code.TypeReference(
-      (t) => t
-        ..symbol = name
-        ..url = dartFile
-        ..types.addAll(typeArguments),
-    );
-  }
+  code.Reference get refer => referType(this.type);
 }
 
 extension PropertyReference on PropertyDefinition {

@@ -269,7 +269,7 @@ class DefinitionContext {
     final referenceName = definition.isReference
         ? definition.referenceName
         : definition.type;
-    final alias = Type(context: this, referenceName: referenceName);
+    final alias = _type(referenceName, definition);
     _logger.fine(
       'adding type alias definition associated with $name '
       '(aliased to ${alias.referenceName})',

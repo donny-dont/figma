@@ -309,13 +309,8 @@ paths:
           in: query
           description: A string enum for the image output format.
           schema:
-            type: string
-            enum:
-              - jpg
-              - png
-              - svg
-              - pdf
-            default: png
+            $ref: "#/components/schema/ExportFormat"
+            default: PNG
         - name: svg_outline_text
           in: query
           description: |-
@@ -1231,14 +1226,14 @@ paths:
             - webhooks:read
       description: Returns a list of webhooks corresponding to the context or plan
         provided, if they exist. For plan, the webhooks for all contexts that
-        you have access to will be returned, and theresponse is paginated
+        you have access to will be returned, and the response is paginated
       operationId: getWebhooks
       parameters:
         - name: context
           in: query
           required: false
           schema:
-            type: string
+            $ref: "#/components/schemas/WebhookContext"
           description: Context to create the resource on. Should be "team", "project", or
             "file".
         - name: context_id
@@ -3191,7 +3186,7 @@ components:
                 $ref: "#/components/schemas/PaintOverride"
                 nullable: true
               description: Map from ID to PaintOverride for looking up fill overrides. To see
-                which regions are overriden, you must use the `geometry=paths`
+                which regions are overridden, you must use the `geometry=paths`
                 option. Each path returned may have an `overrideID` which maps
                 to this table.
             fillGeometry:
@@ -3582,6 +3577,8 @@ components:
         - $ref: "#/components/schemas/CanvasNode"
       discriminator:
         propertyName: type
+        x-dart-type: NodeType
+        x-dart-discriminator: false
         mapping:
           BOOLEAN_OPERATION: "#/components/schemas/BooleanOperationNode"
           COMPONENT: "#/components/schemas/ComponentNode"
@@ -3611,11 +3608,44 @@ components:
           WIDGET: "#/components/schemas/WidgetNode"
           DOCUMENT: "#/components/schemas/DocumentNode"
           CANVAS: "#/components/schemas/CanvasNode"
-      x-dart-mapping:
-        DOCUMENT: "DocumentNode"
-        CANVAS: "CanvasNode"
-        _: "SubcanvasNode"
+        x-dart-mapping:
+          DOCUMENT: "#/components/schemas/DocumentNode"
+          CANVAS: "#/components/schemas/CanvasNode"
+          _: "#/components/schemas/SubcanvasNode"
+    NodeType:
+      type: string
+      enum:
+        - BOOLEAN_OPERATION
+        - COMPONENT
+        - COMPONENT_SET
+        - CONNECTOR
+        - ELLIPSE
+        - EMBED
+        - FRAME
+        - GROUP
+        - INSTANCE
+        - LINE
+        - LINK_UNFURL
+        - RECTANGLE
+        - REGULAR_POLYGON
+        - SECTION
+        - SHAPE_WITH_TEXT
+        - SLICE
+        - STAR
+        - STICKY
+        - TABLE
+        - TABLE_CELL
+        - TEXT
+        - TEXT_PATH
+        - TRANSFORM_GROUP
+        - VECTOR
+        - WASHI_TAPE
+        - WIDGET
+        - DOCUMENT
+        - CANVAS
     DocumentNode:
+      x-dart-type: Document
+      x-dart-implements: [Node]
       allOf:
         - type: object
           properties:
@@ -3632,6 +3662,8 @@ components:
             - children
         - $ref: "#/components/schemas/IsLayerTrait"
     CanvasNode:
+      x-dart-type: Canvas
+      x-dart-implements: [Node]
       allOf:
         - type: object
           properties:
@@ -3683,7 +3715,7 @@ components:
         - $ref: "#/components/schemas/HasExportSettingsTrait"
     SubcanvasNode:
       x-dart-type: SubCanvasNode
-      x-dart-extends: Node
+      x-dart-implements: [Node]
       oneOf:
         - $ref: "#/components/schemas/BooleanOperationNode"
         - $ref: "#/components/schemas/ComponentNode"
@@ -3713,6 +3745,8 @@ components:
         - $ref: "#/components/schemas/WidgetNode"
       discriminator:
         propertyName: type
+        x-dart-type: NodeType
+        x-dart-discriminator: false
         mapping:
           BOOLEAN_OPERATION: "#/components/schemas/BooleanOperationNode"
           COMPONENT: "#/components/schemas/ComponentNode"
@@ -3741,6 +3775,7 @@ components:
           WASHI_TAPE: "#/components/schemas/WashiTapeNode"
           WIDGET: "#/components/schemas/WidgetNode"
     BooleanOperationNode:
+      x-dart-implements: [SubCanvasNode]
       allOf:
         - type: object
           properties:
@@ -3752,7 +3787,6 @@ components:
                 "BOOLEAN_OPERATION"
             booleanOperation:
               type: string
-              x-dart-type: Operation
               description: A string enum indicating the type of boolean operation applied.
               enum:
                 - UNION
@@ -3772,6 +3806,8 @@ components:
         - $ref: "#/components/schemas/HasMaskTrait"
         - $ref: "#/components/schemas/TransitionSourceTrait"
     SectionNode:
+      x-dart-type: Section
+      x-dart-implements: [SubCanvasNode]
       allOf:
         - type: object
           properties:
@@ -3793,6 +3829,8 @@ components:
         - $ref: "#/components/schemas/HasLayoutTrait"
         - $ref: "#/components/schemas/DevStatusTrait"
     FrameNode:
+      x-dart-type: Frame
+      x-dart-implements: [SubCanvasNode]
       allOf:
         - type: object
           properties:
@@ -3805,6 +3843,7 @@ components:
             - type
         - $ref: "#/components/schemas/FrameTraits"
     GroupNode:
+      x-dart-implements: [SubCanvasNode]
       allOf:
         - type: object
           properties:
@@ -3817,6 +3856,7 @@ components:
             - type
         - $ref: "#/components/schemas/FrameTraits"
     ComponentNode:
+      x-dart-implements: [SubCanvasNode]
       allOf:
         - type: object
           properties:
@@ -3831,6 +3871,7 @@ components:
         - $ref: "#/components/schemas/FrameTraits"
         - $ref: "#/components/schemas/ComponentPropertiesTrait"
     ComponentSetNode:
+      x-dart-implements: [SubCanvasNode]
       allOf:
         - type: object
           properties:
@@ -3845,6 +3886,7 @@ components:
         - $ref: "#/components/schemas/FrameTraits"
         - $ref: "#/components/schemas/ComponentPropertiesTrait"
     VectorNode:
+      x-dart-implements: [SubCanvasNode]
       allOf:
         - type: object
           properties:
@@ -3858,6 +3900,7 @@ components:
         - $ref: "#/components/schemas/CornerRadiusShapeTraits"
         - $ref: "#/components/schemas/AnnotationsTrait"
     StarNode:
+      x-dart-implements: [SubCanvasNode]
       allOf:
         - type: object
           properties:
@@ -3871,6 +3914,7 @@ components:
         - $ref: "#/components/schemas/CornerRadiusShapeTraits"
         - $ref: "#/components/schemas/AnnotationsTrait"
     LineNode:
+      x-dart-implements: [SubCanvasNode]
       allOf:
         - type: object
           properties:
@@ -3884,6 +3928,7 @@ components:
         - $ref: "#/components/schemas/DefaultShapeTraits"
         - $ref: "#/components/schemas/AnnotationsTrait"
     EllipseNode:
+      x-dart-implements: [SubCanvasNode]
       allOf:
         - type: object
           properties:
@@ -3900,6 +3945,7 @@ components:
         - $ref: "#/components/schemas/DefaultShapeTraits"
         - $ref: "#/components/schemas/AnnotationsTrait"
     RegularPolygonNode:
+      x-dart-implements: [SubCanvasNode]
       allOf:
         - type: object
           properties:
@@ -3914,6 +3960,7 @@ components:
         - $ref: "#/components/schemas/CornerRadiusShapeTraits"
         - $ref: "#/components/schemas/AnnotationsTrait"
     RectangleNode:
+      x-dart-implements: [SubCanvasNode]
       allOf:
         - type: object
           properties:
@@ -3927,6 +3974,7 @@ components:
             - type
         - $ref: "#/components/schemas/RectangularShapeTraits"
     TextNode:
+      x-dart-implements: [SubCanvasNode]
       allOf:
         - type: object
           properties:
@@ -3941,6 +3989,7 @@ components:
         - $ref: "#/components/schemas/TypePropertiesTrait"
         - $ref: "#/components/schemas/AnnotationsTrait"
     TextPathNode:
+      x-dart-implements: [SubCanvasNode]
       allOf:
         - type: object
           properties:
@@ -3955,6 +4004,7 @@ components:
         - $ref: "#/components/schemas/DefaultShapeTraits"
         - $ref: "#/components/schemas/TextPathPropertiesTrait"
     TableNode:
+      x-dart-implements: [SubCanvasNode]
       allOf:
         - type: object
           properties:
@@ -3973,6 +4023,7 @@ components:
         - $ref: "#/components/schemas/HasBlendModeAndOpacityTrait"
         - $ref: "#/components/schemas/HasExportSettingsTrait"
     TableCellNode:
+      x-dart-implements: [SubCanvasNode]
       allOf:
         - type: object
           properties:
@@ -3989,6 +4040,7 @@ components:
         - $ref: "#/components/schemas/HasLayoutTrait"
         - $ref: "#/components/schemas/HasTextSublayerTrait"
     TransformGroupNode:
+      x-dart-implements: [SubCanvasNode]
       allOf:
         - type: object
           properties:
@@ -4002,6 +4054,7 @@ components:
             - type
         - $ref: "#/components/schemas/FrameTraits"
     SliceNode:
+      x-dart-implements: [SubCanvasNode]
       allOf:
         - type: object
           properties:
@@ -4014,6 +4067,7 @@ components:
             - type
         - $ref: "#/components/schemas/IsLayerTrait"
     InstanceNode:
+      x-dart-implements: [SubCanvasNode]
       allOf:
         - type: object
           properties:
@@ -4054,6 +4108,7 @@ components:
             - overrides
         - $ref: "#/components/schemas/FrameTraits"
     EmbedNode:
+      x-dart-implements: [SubCanvasNode]
       allOf:
         - type: object
           properties:
@@ -4067,6 +4122,7 @@ components:
         - $ref: "#/components/schemas/IsLayerTrait"
         - $ref: "#/components/schemas/HasExportSettingsTrait"
     LinkUnfurlNode:
+      x-dart-implements: [SubCanvasNode]
       allOf:
         - type: object
           properties:
@@ -4081,6 +4137,7 @@ components:
         - $ref: "#/components/schemas/IsLayerTrait"
         - $ref: "#/components/schemas/HasExportSettingsTrait"
     StickyNode:
+      x-dart-implements: [SubCanvasNode]
       allOf:
         - type: object
           properties:
@@ -4104,6 +4161,7 @@ components:
         - $ref: "#/components/schemas/HasExportSettingsTrait"
         - $ref: "#/components/schemas/HasTextSublayerTrait"
     ShapeWithTextNode:
+      x-dart-implements: [SubCanvasNode]
       allOf:
         - type: object
           properties:
@@ -4133,6 +4191,7 @@ components:
         - $ref: "#/components/schemas/CornerTrait"
         - $ref: "#/components/schemas/MinimalStrokesTrait"
     ConnectorNode:
+      x-dart-implements: [SubCanvasNode]
       allOf:
         - type: object
           properties:
@@ -4149,26 +4208,12 @@ components:
               $ref: "#/components/schemas/ConnectorEndpoint"
               description: The ending point of the connector.
             connectorStartStrokeCap:
-              type: string
+              $ref: "#/components/schemas/ConnectorStrokeCap"
               description: A string enum describing the end cap of the start of the connector.
-              enum:
-                - NONE
-                - LINE_ARROW
-                - TRIANGLE_ARROW
-                - DIAMOND_FILLED
-                - CIRCLE_FILLED
-                - TRIANGLE_FILLED
               default: NONE
             connectorEndStrokeCap:
-              type: string
+              $ref: "#/components/schemas/ConnectorStrokeCap"
               description: A string enum describing the end cap of the end of the connector.
-              enum:
-                - NONE
-                - LINE_ARROW
-                - TRIANGLE_ARROW
-                - DIAMOND_FILLED
-                - CIRCLE_FILLED
-                - TRIANGLE_FILLED
               default: NONE
             connectorLineType:
               $ref: "#/components/schemas/ConnectorLineType"
@@ -4191,6 +4236,7 @@ components:
         - $ref: "#/components/schemas/HasTextSublayerTrait"
         - $ref: "#/components/schemas/MinimalStrokesTrait"
     WashiTapeNode:
+      x-dart-implements: [SubCanvasNode]
       allOf:
         - type: object
           properties:
@@ -4204,6 +4250,7 @@ components:
             - type
         - $ref: "#/components/schemas/DefaultShapeTraits"
     WidgetNode:
+      x-dart-implements: [SubCanvasNode]
       allOf:
         - type: object
           properties:
@@ -4242,7 +4289,6 @@ components:
         - b
     RGBA:
       type: object
-      x-dart-type: Color
       description: An RGBA color
       properties:
         r:
@@ -4420,7 +4466,6 @@ components:
         - LUMINOSITY
     Vector:
       type: object
-      x-dart-type: Vector2D
       description: A 2d vector.
       properties:
         x:
@@ -4758,7 +4803,6 @@ components:
         - horizontal
     Rectangle:
       type: object
-      x-dart-type: SizeRectangle
       description: A rectangle that expresses a bounding box in absolute coordinates.
       properties:
         x:
@@ -5222,6 +5266,7 @@ components:
         - EASE_IN_BACK
         - EASE_OUT_BACK
         - EASE_IN_AND_OUT_BACK
+        - CUSTOM_BEZIER
         - CUSTOM_CUBIC_BEZIER
         - GENTLE
         - QUICK
@@ -5383,6 +5428,7 @@ components:
           description: Link to a URL or frame.
         opentypeFlags:
           type: object
+          x-dart-name: openTypeFlags
           additionalProperties:
             type: number
           description: A map of OpenType feature flags to 1 or 0, 1 if it is enabled and 0
@@ -5664,31 +5710,37 @@ components:
         - SPEECH_BUBBLE
         - INTERNAL_STORAGE
     ConnectorEndpoint:
+      type: object
       description: Stores canvas location for a connector start/end point.
-      oneOf:
-        - type: object
-          properties:
-            endpointNodeId:
-              type: string
-              description: Node ID that this endpoint attaches to.
-            position:
-              $ref: "#/components/schemas/Vector"
-              description: The position of the endpoint relative to the node.
-        - type: object
-          properties:
-            endpointNodeId:
-              type: string
-              description: Node ID that this endpoint attaches to.
-            magnet:
-              type: string
-              description: The magnet type is a string enum.
-              enum:
-                - AUTO
-                - TOP
-                - BOTTOM
-                - LEFT
-                - RIGHT
-                - CENTER
+      properties:
+        endpointNodeId:
+          type: string
+          description: Node ID that this endpoint attaches to.
+        position:
+          $ref: "#/components/schemas/Vector"
+          description: The position of the endpoint relative to the node.
+        magnet:
+          type: string
+          description: The magnet type is a string enum.
+          enum:
+            - AUTO
+            - TOP
+            - BOTTOM
+            - LEFT
+            - RIGHT
+            - CENTER
+      required:
+        - endpointNodeId
+    ConnectorStrokeCap:
+      type: string
+      description: Connector stroke cap.
+      enum:
+        - NONE
+        - LINE_ARROW
+        - TRIANGLE_ARROW
+        - DIAMOND_FILLED
+        - CIRCLE_FILLED
+        - TRIANGLE_FILLED
     ConnectorLineType:
       type: string
       description: Connector line type.
@@ -5798,6 +5850,7 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Action"
+            nullable: true
           description: The actions that are performed when the trigger is activated.
       required:
         - trigger
@@ -5811,49 +5864,44 @@ components:
         The `"ON_MEDIA_HIT"` and `"ON_MEDIA_END"` trigger types can only trigger from a video. 
         They fire when a video reaches a certain time or ends. The `timestamp` value is in seconds.
       oneOf:
-        - type: object
-          properties:
-            type:
-              type: string
-              enum:
-                - ON_CLICK
-                - ON_HOVER
-                - ON_PRESS
-                - ON_DRAG
-          required:
-            - type
+        - $ref: "#/components/schemas/OnMouseInteractionTrigger"
         - $ref: "#/components/schemas/AfterTimeoutTrigger"
-        - type: object
-          properties:
-            type:
-              type: string
-              enum:
-                - MOUSE_ENTER
-                - MOUSE_LEAVE
-                - MOUSE_UP
-                - MOUSE_DOWN
-            delay:
-              type: number
-            deprecatedVersion:
-              description: |-
-                Whether this is a [deprecated version](https://help.figma.com/hc/en-us/articles/360040035834-Prototype-triggers#h_01HHN04REHJNP168R26P1CMP0A) of the trigger that was left unchanged for backwards compatibility.
-                If not present, the trigger is the latest version.
-              type: boolean
-          required:
-            - type
-            - delay
+        - $ref: "#/components/schemas/OnMouseMovementTrigger"
         - $ref: "#/components/schemas/OnKeyDownTrigger"
         - $ref: "#/components/schemas/OnMediaHitTrigger"
-        - type: object
-          properties:
-            type:
-              type: string
-              enum:
-                - ON_MEDIA_END
-          required:
-            - type
+        - $ref: "#/components/schemas/OnMediaEndTrigger"
+      discriminator:
+        propertyName: type
+        mapping:
+          ON_CLICK: "#/components/schemas/OnMouseInteractionTrigger"
+          ON_HOVER: "#/components/schemas/OnMouseInteractionTrigger"
+          ON_PRESS: "#/components/schemas/OnMouseInteractionTrigger"
+          ON_DRAG: "#/components/schemas/OnMouseInteractionTrigger"
+          DRAG: "#/components/schemas/OnMouseInteractionTrigger"
+          AFTER_TIMEOUT: "#/components/schemas/AfterTimeoutTrigger"
+          MOUSE_ENTER: "#/components/schemas/OnMouseMovementTrigger"
+          MOUSE_LEAVE: "#/components/schemas/OnMouseMovementTrigger"
+          MOUSE_UP: "#/components/schemas/OnMouseMovementTrigger"
+          MOUSE_DOWN: "#/components/schemas/OnMouseMovementTrigger"
+          ON_KEY_DOWN: "#/components/schemas/OnKeyDownTrigger"
+          ON_MEDIA_HIT: "#/components/schemas/OnMediaHitTrigger"
+          ON_MEDIA_END: "#/components/schemas/OnMediaEndTrigger"
+    OnMouseInteractionTrigger:
+      type: object
+      x-dart-implements: [Trigger]
+      properties:
+        type:
+          type: string
+          enum:
+            - ON_CLICK
+            - ON_HOVER
+            - ON_PRESS
+            - ON_DRAG
+      required:
+        - type
     AfterTimeoutTrigger:
       type: object
+      x-dart-implements: [Trigger]
       properties:
         type:
           type: string
@@ -5866,6 +5914,7 @@ components:
         - timeout
     OnKeyDownTrigger:
       type: object
+      x-dart-implements: [Trigger]
       properties:
         type:
           type: string
@@ -5873,6 +5922,7 @@ components:
             - ON_KEY_DOWN
         device:
           type: string
+          x-dart-type: InputDevice
           enum:
             - KEYBOARD
             - XBOX_ONE
@@ -5887,8 +5937,30 @@ components:
         - type
         - device
         - keyCodes
+    OnMouseMovementTrigger:
+      type: object
+      x-dart-implements: [Trigger]
+      properties:
+        type:
+          type: string
+          enum:
+            - MOUSE_ENTER
+            - MOUSE_LEAVE
+            - MOUSE_UP
+            - MOUSE_DOWN
+        delay:
+          type: number
+        deprecatedVersion:
+          description: |-
+            Whether this is a [deprecated version](https://help.figma.com/hc/en-us/articles/360040035834-Prototype-triggers#h_01HHN04REHJNP168R26P1CMP0A) of the trigger that was left unchanged for backwards compatibility.
+            If not present, the trigger is the latest version.
+          type: boolean
+      required:
+        - type
+        - delay
     OnMediaHitTrigger:
       type: object
+      x-dart-implements: [Trigger]
       properties:
         type:
           type: string
@@ -5899,27 +5971,52 @@ components:
       required:
         - type
         - mediaHitTime
+    OnMediaEndTrigger:
+      type: object
+      x-dart-implements: [Trigger]
+      properties:
+        type:
+          type: string
+          enum:
+            - ON_MEDIA_END
+      required:
+        - type
     Action:
       type: object
       description: An action that is performed when a trigger is activated.
       oneOf:
-        - type: object
-          properties:
-            type:
-              type: string
-              enum:
-                - BACK
-                - CLOSE
-          required:
-            - type
+        - $ref: "#/components/schemas/ReturnAction"
         - $ref: "#/components/schemas/OpenURLAction"
         - $ref: "#/components/schemas/UpdateMediaRuntimeAction"
         - $ref: "#/components/schemas/SetVariableAction"
         - $ref: "#/components/schemas/SetVariableModeAction"
         - $ref: "#/components/schemas/ConditionalAction"
         - $ref: "#/components/schemas/NodeAction"
+      discriminator:
+        propertyName: type
+        mapping:
+          BACK: "#/components/schemas/ReturnAction"
+          CLOSE: "#/components/schemas/ReturnAction"
+          URL: "#/components/schemas/OpenURLAction"
+          UPDATE_MEDIA_RUNTIME: "#/components/schemas/UpdateMediaRuntimeAction"
+          SET_VARIABLE: "#/components/schemas/SetVariableAction"
+          SET_VARIABLE_MODE: "#/components/schemas/SetVariableModeAction"
+          CONDITIONAL: "#/components/schemas/ConditionalAction"
+          NODE: "#/components/schemas/NodeAction"
+    ReturnAction:
+      type: object
+      x-dart-implements: [Action]
+      properties:
+        type:
+          type: string
+          enum:
+            - BACK
+            - CLOSE
+      required:
+        - type
     OpenURLAction:
       type: object
+      x-dart-implements: [Action]
       description: An action that opens a URL.
       properties:
         type:
@@ -5932,27 +6029,49 @@ components:
         - type
         - url
     UpdateMediaRuntimeAction:
-      type: object
       description: An action that affects a video node in the Figma viewer. For
         example, to play, pause, or skip.
+      x-dart-implements: [Action]
       oneOf:
+        - $ref: "#/components/schemas/UpdateMediaRuntimePlaybackAction"
+        - $ref: "#/components/schemas/UpdateMediaRuntimeSkipByAction"
+        - $ref: "#/components/schemas/UpdateMediaRuntimeSkipToAction"
+      discriminator:
+        propertyName: mediaAction
+        x-dart-type: MediaAction
+        mapping:
+          PLAY: "#/components/schemas/UpdateMediaRuntimePlaybackAction"
+          PAUSE: "#/components/schemas/UpdateMediaRuntimePlaybackAction"
+          TOGGLE_PLAY_PAUSE: "#/components/schemas/UpdateMediaRuntimePlaybackAction"
+          MUTE: "#/components/schemas/UpdateMediaRuntimePlaybackAction"
+          UNMUTE: "#/components/schemas/UpdateMediaRuntimePlaybackAction"
+          TOGGLE_MUTE_UNMUTE: "#/components/schemas/UpdateMediaRuntimePlaybackAction"
+          SKIP_FORWARD: "#/components/schemas/UpdateMediaRuntimeSkipByAction"
+          SKIP_BACKWARD: "#/components/schemas/UpdateMediaRuntimeSkipByAction"
+          SKIP_TO: "#/components/schemas/UpdateMediaRuntimeSkipToAction"
+    BaseUpdateMediaRuntimeAction:
+      type: object
+      properties:
+        type:
+          type: string
+          $ref: "#/components/schemas/ActionType"
+          enum:
+            - UPDATE_MEDIA_RUNTIME
+        destinationId:
+          type: string
+          nullable: true
+          description: The `destinationId` is the node ID of the media node to update.
+            If `destinationId` is `null`, the action will update the media node that
+            contains the action.
+      required:
+        - type
+        - destinationId
+    UpdateMediaRuntimePlaybackAction:
+      allOf:
         - type: object
-          description: |-
-            An action that updates the runtime of a media node by playing, pausing, toggling play/pause, 
-            muting, unmuting, or toggling mute/unmute.
-
-            The `destinationId` is the node ID of the media node to update. If `destinationId` is `null`, the action will 
-            update the media node that contains the action.
-
-            The `mediaAction` is the action to perform on the media node.
+          description: An action that updates the runtime of a media node by playing, pausing,
+            toggling play/pause, muting, unmuting, or toggling mute/unmute.
           properties:
-            type:
-              type: string
-              enum:
-                - UPDATE_MEDIA_RUNTIME
-            destinationId:
-              type: string
-              nullable: true
             mediaAction:
               type: string
               enum:
@@ -5963,27 +6082,14 @@ components:
                 - UNMUTE
                 - TOGGLE_MUTE_UNMUTE
           required:
-            - type
-            - destinationId
             - mediaAction
+        - $ref: "#/components/schemas/BaseUpdateMediaRuntimeAction"
+    UpdateMediaRuntimeSkipByAction:
+      allOf:
         - type: object
-          description: |-
-            An action that updates the runtime of a media node by skipping forward or backward.
-
-            The `destinationId` is the node ID of the media node to update. If `destinationId` is `null`, the action will 
-            update the media node that contains the action.
-
-            The `mediaAction` is the action to perform on the media node.
-
-            The `amountToSkip` is the amount of time to skip in seconds.
+          description: An action that updates the runtime of a media node by skipping forward
+            or backward.
           properties:
-            type:
-              type: string
-              enum:
-                - UPDATE_MEDIA_RUNTIME
-            destinationId:
-              type: string
-              nullable: true
             mediaAction:
               type: string
               enum:
@@ -5991,42 +6097,31 @@ components:
                 - SKIP_BACKWARD
             amountToSkip:
               type: number
+              description: The amount of time to skip in seconds
           required:
-            - type
-            - destinationId
             - mediaAction
             - amountToSkip
+        - $ref: "#/components/schemas/BaseUpdateMediaRuntimeAction"
+    UpdateMediaRuntimeSkipToAction:
+      allOf:
         - type: object
-          description: |-
-            An action that updates the runtime of a media node by skipping to a specific time.
-
-            The `destinationId` is the node ID of the media node to update. If `destinationId` is `null`, the action will 
-            update the media node that contains the action.
-
-            The `mediaAction` is the action to perform on the media node.
-
-            The `newTimestamp` is the new time to skip to in seconds.
+          description: An action that updates the runtime of a media node by skipping
+            to a specific time.
           properties:
-            type:
-              type: string
-              enum:
-                - UPDATE_MEDIA_RUNTIME
-            destinationId:
-              type: string
-              nullable: true
             mediaAction:
               type: string
               enum:
                 - SKIP_TO
             newTimestamp:
               type: number
+              description: The new time to skip to in seconds
           required:
-            - type
-            - destinationId
             - mediaAction
             - newTimestamp
+        - $ref: "#/components/schemas/BaseUpdateMediaRuntimeAction"
     NodeAction:
       type: object
+      x-dart-implements: [Action]
       description: An action that navigates to a specific node in the Figma viewer.
       properties:
         type:
@@ -6094,8 +6189,20 @@ components:
       oneOf:
         - $ref: "#/components/schemas/SimpleTransition"
         - $ref: "#/components/schemas/DirectionalTransition"
+      discriminator:
+        propertyName: type
+        mapping:
+          DISSOLVE: "#/components/schemas/SimpleTransition"
+          SMART_ANIMATE: "#/components/schemas/SimpleTransition"
+          SCROLL_ANIMATE: "#/components/schemas/SimpleTransition"
+          MOVE_IN: "#/components/schemas/DirectionalTransition"
+          MOVE_OUT: "#/components/schemas/DirectionalTransition"
+          PUSH: "#/components/schemas/DirectionalTransition"
+          SLIDE_IN: "#/components/schemas/DirectionalTransition"
+          SLIDE_OUT: "#/components/schemas/DirectionalTransition"
     SimpleTransition:
       type: object
+      x-dart-implements: [Transition]
       description: Describes an animation used when navigating in a prototype.
       properties:
         type:
@@ -6116,6 +6223,7 @@ components:
         - easing
     DirectionalTransition:
       type: object
+      x-dart-implements: [Transition]
       description: Describes an animation used when navigating in a prototype.
       properties:
         type:
@@ -6128,6 +6236,7 @@ components:
             - SLIDE_OUT
         direction:
           type: string
+          x-dart-type: TransitionDirection
           enum:
             - LEFT
             - RIGHT
@@ -6159,6 +6268,7 @@ components:
           description: The type of easing curve.
         easingFunctionCubicBezier:
           type: object
+          x-dart-type: CubicBezier
           description: A cubic bezier curve that defines the easing.
           properties:
             x1:
@@ -6180,6 +6290,7 @@ components:
             - y2
         easingFunctionSpring:
           type: object
+          x-dart-type: Spring
           description: A spring function that defines the easing.
           properties:
             mass:
@@ -6196,6 +6307,7 @@ components:
         - type
     SetVariableAction:
       type: object
+      x-dart-implements: [Action]
       description: Sets a variable to a specific value.
       properties:
         type:
@@ -6212,6 +6324,7 @@ components:
         - variableId
     SetVariableModeAction:
       type: object
+      x-dart-implements: [Action]
       description: Sets a variable to a specific mode.
       properties:
         type:
@@ -6230,6 +6343,7 @@ components:
         - variableModeId
     ConditionalAction:
       type: object
+      x-dart-implements: [Action]
       description: Checks if a condition is met before performing certain actions by
         using an if/else conditional statement.
       properties:
@@ -6266,7 +6380,7 @@ components:
         - EXPRESSION
     VariableResolvedDataType:
       type: string
-      x-dart-type: ResolvedType
+      x-dart-type: VariableResolvedType
       description: Defines the types of data a VariableData object can eventually equal
       enum:
         - BOOLEAN
@@ -6333,9 +6447,7 @@ components:
         end:
           $ref: "#/components/schemas/MeasurementStartEnd"
         offset:
-          oneOf:
-            - $ref: "#/components/schemas/MeasurementOffsetInner"
-            - $ref: "#/components/schemas/MeasurementOffsetOuter"
+          $ref: "#/components/schemas/MeasurementOffset"
         freeText:
           type: string
           description: When manually overridden, the displayed value of the measurement
@@ -6360,8 +6472,18 @@ components:
       required:
         - nodeId
         - side
+    MeasurementOffset:
+      oneOf:
+        - $ref: "#/components/schemas/MeasurementOffsetInner"
+        - $ref: "#/components/schemas/MeasurementOffsetOuter"
+      discriminator:
+        propertyName: type
+        mapping:
+          INNER: "#/components/schemas/MeasurementOffsetInner"
+          OUTER: "#/components/schemas/MeasurementOffsetOuter"
     MeasurementOffsetInner:
       type: object
+      x-dart-implements: [MeasurementOffset]
       description: Measurement offset relative to the inside of the start node
       properties:
         type:
@@ -6375,6 +6497,7 @@ components:
         - relative
     MeasurementOffsetOuter:
       type: object
+      x-dart-implements: [MeasurementOffset]
       description: Measurement offset relative to the outside of the start node
       properties:
         type:
@@ -8601,6 +8724,7 @@ components:
         application/json:
           schema:
             type: object
+            x-dart-type: FileResponse
             properties:
               name:
                 type: string
@@ -8651,6 +8775,7 @@ components:
                 description: A mapping from style IDs to style metadata.
               linkAccess:
                 type: string
+                $ref: "#/components/schemas/LinkAccess"
                 description: The share permission level of the file link.
               mainFileKey:
                 type: string
@@ -8661,6 +8786,7 @@ components:
                 description: A list of branches for this file.
                 items:
                   type: object
+                  x-dart-type: Branch
                   properties:
                     key:
                       type: string
@@ -8697,6 +8823,7 @@ components:
         application/json:
           schema:
             type: object
+            x-dart-type: NodesResponse
             properties:
               name:
                 type: string
@@ -8729,6 +8856,7 @@ components:
                 description: A mapping from node IDs to node metadata.
                 additionalProperties:
                   type: object
+                  x-dart-type: NodeMeta
                   properties:
                     document:
                       $ref: "#/components/schemas/Node"
@@ -8771,10 +8899,11 @@ components:
         application/json:
           schema:
             type: object
+            x-dart-type: ImagesResponse
             properties:
-              err:
-                type: "null"
-                description: For successful requests, this value is always `null`.
+              #err:
+              #  type: "null"
+              #  description: For successful requests, this value is always `null`.
               images:
                 type: object
                 description: A map from node IDs to URLs of the rendered images.
@@ -8792,6 +8921,7 @@ components:
         application/json:
           schema:
             type: object
+            x-dart-type: ImageFillsResponse
             properties:
               error:
                 type: boolean
@@ -8805,6 +8935,7 @@ components:
                   - 200
               meta:
                 type: object
+                x-dart-type: ImageFillsMeta
                 properties:
                   images:
                     type: object
@@ -8825,66 +8956,73 @@ components:
         application/json:
           schema:
             type: object
-            x-dart-type: FileMeta
+            x-dart-type: FileMetaResponse
             properties:
-              name:
-                type: string
-                description: The name of the file.
-              folder_name:
-                type: string
-                description: The name of the project containing the file.
-              last_touched_at:
-                type: string
-                format: date-time
-                description: The UTC ISO 8601 time at which the file content was last modified.
-              creator:
-                description: The user who created the file.
-                $ref: "#/components/schemas/User"
-              last_touched_by:
-                description: The user who last modified the file contents.
-                $ref: "#/components/schemas/User"
-              thumbnail_url:
-                type: string
-                description: A URL to a thumbnail image of the file.
-              editorType:
-                $ref: "#/components/schemas/EditorType"
-                description: The type of editor associated with this file.
-              role:
-                type: string
-                enum:
-                  - owner
-                  - editor
-                  - viewer
-                description: The role of the user making the API request in relation to the
-                  file.
-              link_access:
-                type: string
-                enum:
-                  - view
-                  - edit
-                  - org_view
-                  - org_edit
-                  - inherit
-                description: Access policy for users who have the link to the file.
-              url:
-                type: string
-                description: The URL of the file.
-              version:
-                type: string
-                description: The version number of the file. This number is incremented when a
-                  file is modified and can be used to check if the file has
-                  changed between requests.
+              file:
+                type: object
+                x-dart-type: FileMeta
+                properties:
+                  name:
+                    type: string
+                    description: The name of the file.
+                  folder_name:
+                    type: string
+                    description: The name of the project containing the file.
+                  last_touched_at:
+                    type: string
+                    format: date-time
+                    description: The UTC ISO 8601 time at which the file content was last modified.
+                  creator:
+                    description: The user who created the file.
+                    $ref: "#/components/schemas/User"
+                  last_touched_by:
+                    description: The user who last modified the file contents.
+                    $ref: "#/components/schemas/User"
+                  thumbnail_url:
+                    type: string
+                    description: A URL to a thumbnail image of the file.
+                  editorType:
+                    $ref: "#/components/schemas/EditorType"
+                    description: The type of editor associated with this file.
+                  role:
+                    type: string
+                    enum:
+                      - owner
+                      - editor
+                      - viewer
+                    description: The role of the user making the API request in relation to the
+                      file.
+                  link_access:
+                    type: string
+                    enum:
+                      - view
+                      - edit
+                      - org_view
+                      - org_edit
+                      - inherit
+                    description: Access policy for users who have the link to the file.
+                  url:
+                    type: string
+                    description: The URL of the file.
+                  version:
+                    type: string
+                    description: The version number of the file. This number is incremented when a
+                      file is modified and can be used to check if the file has
+                      changed between requests.
+                required:
+                  - name
+                  - last_touched_at
+                  - creator
+                  - editorType
             required:
-              - name
-              - last_touched_at
-              - creator
-              - editorType
+              - file
     GetTeamProjectsResponse:
       description: Response from the GET /v1/teams/{team_id}/projects endpoint.
       content:
         application/json:
           schema:
             type: object
+            x-dart-type: TeamProjectsResponse
             properties:
               name:
                 type: string
@@ -8903,6 +9041,7 @@ components:
         application/json:
           schema:
             type: object
+            x-dart-type: ProjectFilesResponse
             properties:
               name:
                 type: string
@@ -8958,6 +9097,7 @@ components:
         application/json:
           schema:
             type: object
+            x-dart-type: CommentsResponse
             properties:
               comments:
                 type: array
@@ -9074,17 +9214,18 @@ components:
         application/json:
           schema:
             type: object
+            x-dart-type: ComponentsResponse
             properties:
-              #status:
-              #  type: number
-              #  description: The status of the request.
-              #  enum:
-              #    - 200
-              #error:
-              #  type: boolean
-              #  description: For successful requests, this value is always `false`.
-              #  enum:
-              #    - false
+              status:
+                type: number
+                description: The status of the request.
+                enum:
+                  - 200
+              error:
+                type: boolean
+                description: For successful requests, this value is always `false`.
+                enum:
+                  - false
               meta:
                 type: object
                 x-dart-type: ComponentsMeta
@@ -9137,6 +9278,7 @@ components:
         application/json:
           schema:
             type: object
+            x-dart-type: ComponentResponse
             properties:
               status:
                 type: number
@@ -9149,6 +9291,7 @@ components:
                 enum:
                   - false
               meta:
+                x-dart-name: component
                 $ref: "#/components/schemas/PublishedComponent"
             required:
               - status
@@ -9160,6 +9303,7 @@ components:
         application/json:
           schema:
             type: object
+            x-dart-type: ComponentSetsResponse
             properties:
               status:
                 type: number
@@ -9173,6 +9317,7 @@ components:
                   - false
               meta:
                 type: object
+                x-dart-type: ComponentSetsMeta
                 properties:
                   component_sets:
                     type: array
@@ -9192,6 +9337,7 @@ components:
         application/json:
           schema:
             type: object
+            x-dart-type: ComponentSetsResponse
             properties:
               status:
                 type: number
@@ -9222,6 +9368,7 @@ components:
         application/json:
           schema:
             type: object
+            x-dart-type: ComponentSetResponse
             properties:
               status:
                 type: number
@@ -9234,6 +9381,7 @@ components:
                 enum:
                   - false
               meta:
+                x-dart-name: componentSet
                 $ref: "#/components/schemas/PublishedComponentSet"
             required:
               - status
@@ -9245,19 +9393,21 @@ components:
         application/json:
           schema:
             type: object
+            x-dart-type: StylesResponse
             properties:
-              #status:
-              #  type: number
-              #  description: The status of the request.
-              #  enum:
-              #    - 200
-              #error:
-              #  type: boolean
-              #  description: For successful requests, this value is always `false`.
-              #  enum:
-              #    - false
+              status:
+                type: number
+                description: The status of the request.
+                enum:
+                  - 200
+              error:
+                type: boolean
+                description: For successful requests, this value is always `false`.
+                enum:
+                  - false
               meta:
                 type: object
+                x-dart-type: StylesMeta
                 properties:
                   styles:
                     type: array
@@ -9278,19 +9428,18 @@ components:
           schema:
             type: object
             properties:
-              #status:
-              #  type: number
-              #  description: The status of the request.
-              #  enum:
-              #    - 200
-              #error:
-              #  type: boolean
-              #  description: For successful requests, this value is always `false`.
-              #  enum:
-              #    - false
+              status:
+                type: number
+                description: The status of the request.
+                enum:
+                  - 200
+              error:
+                type: boolean
+                description: For successful requests, this value is always `false`.
+                enum:
+                  - false
               meta:
                 type: object
-                x-dart-type: StylesMeta
                 properties:
                   styles:
                     type: array
@@ -9308,6 +9457,7 @@ components:
         application/json:
           schema:
             type: object
+            x-dart-type: StyleResponse
             properties:
               status:
                 type: number
@@ -9320,6 +9470,7 @@ components:
                 enum:
                   - false
               meta:
+                x-dart-name: style
                 $ref: "#/components/schemas/PublishedStyle"
             required:
               - status
@@ -9343,6 +9494,7 @@ components:
         application/json:
           schema:
             type: object
+            x-dart-type: WebhooksResponse
             properties:
               webhooks:
                 type: array

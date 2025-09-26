@@ -46,11 +46,38 @@ extension ClassHierarchy on ClassDefinition {
       implements.map((t) => t.definition);
 
   Iterable<PropertyDefinition> get fields sync* {
+    yield* mixinFields;
+    yield* properties.where(_isField);
+  }
+
+  Iterable<PropertyDefinition> get classFields sync* {
+    final check = _isOverridden(<PropertyDefinition>[
+      ...mixinFields,
+      ...superFields,
+      ...discriminators,
+    ]);
+
+    yield* fields.where((p) => !check(p));
+  }
+
+  Iterable<PropertyDefinition> get overriddenFields sync* {
+    yield* fields.where(
+      _isOverridden(<PropertyDefinition>[
+        ...mixinFields,
+        ...superFields,
+        ...discriminators,
+      ]),
+    );
+  }
+
+  Iterable<PropertyDefinition> get mixinFields sync* {
     for (final mixin in mixins) {
       yield* mixin.properties.where(_isField);
-    }
 
-    yield* properties.where(_isField);
+      for (final implement in mixin.implements) {
+        yield* (implement.definition as ClassDefinition).fields;
+      }
+    }
   }
 
   Iterable<PropertyDefinition> get superFields sync* {
@@ -99,6 +126,20 @@ extension ClassHierarchy on ClassDefinition {
   }
 
   bool _isField(PropertyDefinition definition) => !definition.singleValue;
+
+  bool Function(PropertyDefinition) _isOverridden(
+    List<PropertyDefinition> values,
+  ) => (definition) {
+    final name = definition.name;
+
+    for (final value in values) {
+      if (name == value.name) {
+        return true;
+      }
+    }
+
+    return false;
+  };
 
   /// Function used to check if a type is a mixin.
   static bool Function(TypeDefinition) mixinCheck = _none;

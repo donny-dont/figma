@@ -5,8 +5,14 @@ extension TypeDocumentation on TypeDefinition {
 }
 
 extension PropertyDocumentation on PropertyDefinition {
-  Iterable<String> get toDocumentation =>
-      documentationStrings(description, indent: '  ');
+  Iterable<String> get toDocumentation {
+    // Special case where finding first '.' messes up the formatting
+    if (name == 'uri' && description.contains('e.g.')) {
+      return <String>[_docString(description)];
+    }
+
+    return documentationStrings(description, indent: '  ');
+  }
 }
 
 const String _docComment = '/// ';
@@ -27,9 +33,7 @@ Iterable<String> documentationStrings(
     return processed.map(_docString);
   }
 
-  return processed
-      .expand(_splitLines(maxWidth))
-      .map(_docString);
+  return processed.expand(_splitLines(maxWidth)).map(_docString);
 }
 
 Iterable<String> Function(String) _splitLines(int maxWidth) => (value) sync* {
@@ -71,7 +75,7 @@ Iterable<String> Function(String) _splitLines(int maxWidth) => (value) sync* {
         continue;
       }
 
-      splitAt = theRest.indexOf(' ', splitAt);
+      splitAt = theRest.indexOf(' ', spaceLeft);
       if (splitAt == -1) {
         yield writeLine(theRest);
         break;
@@ -90,7 +94,7 @@ Iterable<String> Function(String) _splitLines(int maxWidth) => (value) sync* {
 String _trimString(String value) => value.trim();
 
 String _includePeriod(String value) =>
-    value.isEmpty || value.endsWith('.') ? value : '$value.';
+    value.needsPunctuation ? '$value.' : value;
 
 String _docString(String value) => '$_docComment$value';
 
@@ -102,6 +106,9 @@ List<String> _processDescription(String description) {
   for (final split in description.split('\n').map(_trimString)) {
     if (split.isEmpty) {
       if (joined.isNotEmpty) {
+        if (addSpace) {
+          joined.writeNewLine();
+        }
         joined.writeNewLine();
         foundSummary = true;
         addSpace = false;
@@ -111,7 +118,9 @@ List<String> _processDescription(String description) {
     }
 
     if (split.startsWith('-')) {
-      joined.writeNewLine();
+      if (addSpace) {
+        joined.writeNewLine();
+      }
       foundSummary = true;
       addSpace = false;
     }
@@ -144,8 +153,6 @@ List<String> _processDescription(String description) {
           addSpace = false;
         }
 
-        print(joined.toString());
-
         foundSummary = true;
       } else {
         joined.write(split);
@@ -154,6 +161,11 @@ List<String> _processDescription(String description) {
   }
 
   return joined.toString().trimRight().split('\n').map(_includePeriod).toList();
+}
+
+extension on String {
+  bool get needsPunctuation =>
+      isNotEmpty && !(endsWith('.') || endsWith(':') || endsWith('`'));
 }
 
 extension on StringBuffer {
@@ -165,6 +177,6 @@ extension on StringBuffer {
   }
 
   void writeNewLine() {
-    writeln();
+    writeCharCode(_lineFeedCode);
   }
 }

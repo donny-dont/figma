@@ -54,7 +54,6 @@ void addDiscriminator(String name, JsonMap definitions) {
     }
 
     property[r'$ref'] = '#/components/schemas/$discriminatorType';
-    print(property);
   }
 }
 
@@ -99,6 +98,7 @@ const _discriminatorTypes = <String, String>{
   'BlurEffect': 'BaseBlurEffect',
   'NoiseEffect': 'BaseNoiseEffect',
   'Paint': 'BasePaint',
+  'UpdateMediaRuntimeAction': 'BaseUpdateMediaRuntimeAction',
 };
 
 void addDiscriminatorTypes(
@@ -127,9 +127,20 @@ const _defaultResponseTypes = <String>[
   'GetFileMetaResponse',
   'GetFileStylesResponse',
   'GetTeamProjectsResponse',
+  'GetTeamStylesResponse',
   'GetProjectFilesResponse',
   'GetFileVersionsResponse',
   'GetTeamComponentsResponse',
+  'GetCommentsResponse',
+  'GetStyleResponse',
+  'GetWebhooksResponse',
+  'GetComponentResponse',
+  'GetFileNodesResponse',
+  'GetImagesResponse',
+  'GetFileResponse',
+  'GetImageFillsResponse',
+  'GetTeamComponentSetsResponse',
+  'GetComponentSetResponse',
 ];
 
 void addResponses(
@@ -150,6 +161,12 @@ const List<String> _defaultRequestEndpoints = <String>[
   '/v2/webhooks',
   '/v2/webhooks/{webhook_id}',
   '/v1/files/{file_key}/comments',
+  '/v1/images/{file_key}',
+  '/v1/files/{file_key}',
+  '/v1/files/{file_key}/nodes',
+  '/v1/teams/{team_id}/components',
+  '/v1/teams/{team_id}/styles',
+  '/v1/teams/{team_id}/component_sets',
 ];
 
 void addRequests(
@@ -178,5 +195,55 @@ void addRequests(
 
       schemas[name] = put.requestBodySchema;
     }
+  }
+}
+
+void addQueries(
+  JsonMap document, {
+  List<String> endpoints = _defaultRequestEndpoints,
+}) {
+  final schemas = document.componentSchemas;
+  final paths = document.paths;
+  print('adding query');
+
+  for (final endpoint in endpoints) {
+    final path = paths.path(endpoint);
+
+    if (path.hasGet) {
+      final get = path.get;
+      final name = get.operationId.toPascalCase();
+      print('adding $name to schemas');
+
+      final required = <String>[];
+      final properties = <String, Object?>{};
+      for (final parameter in get.parameters) {
+        if (parameter['in'] != 'query') {
+          continue;
+        }
+
+        final propertyName = parameter['name']! as String;
+        if (parameter.getBool('required')) {
+          required.add(propertyName);
+        }
+
+        properties[propertyName] = <String, Object?>{
+          'description': parameter.description,
+          ...parameter.getJson('schema'),
+        };
+      }
+
+      if (properties.isNotEmpty) {
+        schemas[name] = <String, Object?>{
+          'type': 'object',
+          'properties': properties,
+          'required': required,
+          'description': get.description,
+        };
+      }
+    }
+  }
+
+  if (schemas.containsKey('GetTeamComponents')) {
+    schemas['GetPage'] = schemas['GetTeamComponents'];
   }
 }

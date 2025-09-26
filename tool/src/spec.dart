@@ -130,8 +130,6 @@ code.Spec classSpec(ClassDefinition value) {
     jsonSerializableArguments['createFactory'] = code.literalFalse;
   }
 
-  final fields = value.fields;
-
   return code.Class(
     (c) => c
       ..name = dartName
@@ -150,7 +148,7 @@ code.Spec classSpec(ClassDefinition value) {
             ..constant = true
             ..optionalParameters.addAll(<code.Parameter>[
               ...value.superFields.map(_constructorSuperParameterSpec),
-              ...fields.map(_constructorThisParameterSpec),
+              ...value.fields.map(_constructorThisParameterSpec),
             ]),
         ),
         code.Constructor(
@@ -172,7 +170,10 @@ code.Spec classSpec(ClassDefinition value) {
                   ]).code,
         ),
       ])
-      ..fields.addAll(<code.Field>[...fields.map(_fieldClassPropertySpec)])
+      ..fields.addAll(<code.Field>[
+        ...value.overriddenFields.map(_fieldMixinPropertySpec),
+        ...value.classFields.map(_fieldClassPropertySpec),
+      ])
       ..methods.addAll(<code.Method>[
         if (generateDiscriminatorProperty)
           _getterPropertySpec()(discriminator!),
@@ -329,7 +330,7 @@ code.Class _mixinSpec(ClassDefinition value) => code.Class(
     ..docs.addAll(value.toDocumentation)
     ..abstract = true
     ..mixin = true
-    ..implements.addAll(value.implements.map(reference.type))
+    ..implements.addAll(value.implements.map(reference.referType))
     ..methods.addAll(value.properties.map(_getterPropertySpec())),
 );
 
@@ -381,12 +382,15 @@ code.EnumValue _enumValue(EnumValueDefinition value) => code.EnumValue(
     ..annotations.add(annotate.jsonValue(value.value)),
 );
 
-code.Spec typeAliasSpec(TypeAliasDefinition value) => code.TypeDef(
-  (t) => t
-    ..name = value.name
-    ..docs.addAll(value.toDocumentation)
-    ..definition = value.alias.definition.referWithArguments,
-);
+code.Spec typeAliasSpec(TypeAliasDefinition value) {
+  final alias = value.alias;
+  return code.TypeDef(
+    (t) => t
+      ..name = value.name
+      ..docs.addAll(value.toDocumentation)
+      ..definition = reference.referType(alias),
+  );
+}
 
 code.Code _discriminatorConstructorBody(DiscriminatorDefinition property) {
   final mapping = Map<String, Type>.from(property.mapping);

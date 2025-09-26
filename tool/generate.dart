@@ -361,6 +361,7 @@ Future<void> main() async {
   addDiscriminatorTypes(document);
   addResponses(document);
   addRequests(document);
+  addQueries(document);
   modifyProgress.finish();
 
   final parsingProgress = logger.progress('Parsing Figma API specification');
@@ -369,7 +370,7 @@ Future<void> main() async {
 
   await fileListingMode(
     definitions,
-    p.join('tool', 'types.txt'),
+    p.join('..', 'figma', 'tool', 'types.txt'),
     root: p.join('..', 'figma'),
     generatedComment: generatedComment,
   );
