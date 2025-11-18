@@ -1298,7 +1298,7 @@ paths:
                     and 'context_id' instead.
                   deprecated: true
                 context:
-                  type: string
+                  $ref: "#/components/schemas/WebhookContext"
                   description: Context to create the webhook for. Must be "team", "project", or
                     "file".
                 context_id:
@@ -6380,7 +6380,7 @@ components:
         - EXPRESSION
     VariableResolvedDataType:
       type: string
-      x-dart-type: VariableResolvedType
+      #x-dart-type: VariableResolvedType
       description: Defines the types of data a VariableData object can eventually equal
       enum:
         - BOOLEAN
@@ -9716,6 +9716,7 @@ components:
         application/json:
           schema:
             type: object
+            x-dart-type: DevResourcesResponse
             properties:
               dev_resources:
                 type: array

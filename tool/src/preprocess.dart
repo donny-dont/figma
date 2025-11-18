@@ -122,25 +122,26 @@ void addDiscriminatorTypes(
 }
 
 const _defaultResponseTypes = <String>[
-  'GetLocalVariablesResponse',
-  'GetPublishedVariablesResponse',
+  'GetCommentsResponse',
+  'GetComponentResponse',
+  'GetComponentSetResponse',
+  'GetDevResourcesResponse',
   'GetFileMetaResponse',
+  'GetFileNodesResponse',
+  'GetFileResponse',
   'GetFileStylesResponse',
+  'GetFileVersionsResponse',
+  'GetImageFillsResponse',
+  'GetImagesResponse',
+  'GetLocalVariablesResponse',
+  'GetProjectFilesResponse',
+  'GetPublishedVariablesResponse',
+  'GetStyleResponse',
+  'GetTeamComponentSetsResponse',
+  'GetTeamComponentsResponse',
   'GetTeamProjectsResponse',
   'GetTeamStylesResponse',
-  'GetProjectFilesResponse',
-  'GetFileVersionsResponse',
-  'GetTeamComponentsResponse',
-  'GetCommentsResponse',
-  'GetStyleResponse',
   'GetWebhooksResponse',
-  'GetComponentResponse',
-  'GetFileNodesResponse',
-  'GetImagesResponse',
-  'GetFileResponse',
-  'GetImageFillsResponse',
-  'GetTeamComponentSetsResponse',
-  'GetComponentSetResponse',
 ];
 
 void addResponses(
@@ -158,15 +159,16 @@ void addResponses(
 }
 
 const List<String> _defaultRequestEndpoints = <String>[
-  '/v2/webhooks',
-  '/v2/webhooks/{webhook_id}',
-  '/v1/files/{file_key}/comments',
-  '/v1/images/{file_key}',
   '/v1/files/{file_key}',
+  '/v1/files/{file_key}/comments',
+  '/v1/files/{file_key}/dev_resources',
   '/v1/files/{file_key}/nodes',
+  '/v1/images/{file_key}',
+  '/v1/teams/{team_id}/component_sets',
   '/v1/teams/{team_id}/components',
   '/v1/teams/{team_id}/styles',
-  '/v1/teams/{team_id}/component_sets',
+  '/v2/webhooks',
+  '/v2/webhooks/{webhook_id}',
 ];
 
 void addRequests(
