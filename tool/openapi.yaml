@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Figma API
-  version: 0.33.0
+  version: 0.36.0
   description: |-
     This is the OpenAPI specification for the [Figma REST API](https://www.figma.com/developers/api).
 
@@ -2776,6 +2776,10 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/VariableAlias"
+            gridColumnGap:
+              $ref: "#/components/schemas/VariableAlias"
+            gridRowGap:
+              $ref: "#/components/schemas/VariableAlias"
             rectangleCornerRadii:
               type: object
               x-dart-type: RectangleCornerRadiiVariables
@@ -2850,7 +2854,7 @@ components:
         layoutAlign:
           type: string
           description: |-
-            
+
             Determines if the layer should stretch along the parent's counter axis. This property is only provided for direct children of auto-layout frames.
 
             - `INHERIT`
@@ -3291,6 +3295,12 @@ components:
           $ref: "#/components/schemas/StrokeWeights"
           description: An object including the top, bottom, left, and right stroke
             weights. Only returned if individual stroke weights are used.
+    VariableWidthStrokesTrait:
+      type: object
+      properties: {}
+    ComplexStrokesTrait:
+      type: object
+      properties: {}
     CornerTrait:
       type: object
       properties:
@@ -3456,6 +3466,7 @@ components:
         - style
         - characterStyleOverrides
         - styleOverrideTable
+        - textPathStartData
     HasTextSublayerTrait:
       type: object
       properties:
@@ -3509,6 +3520,9 @@ components:
     AnnotationsTrait:
       type: object
       properties: {}
+    TransformModifiersTrait:
+      type: object
+      properties: {}
     FrameTraits:
       allOf:
         - $ref: "#/components/schemas/IsLayerTrait"
@@ -3523,6 +3537,8 @@ components:
         - $ref: "#/components/schemas/HasMaskTrait"
         - $ref: "#/components/schemas/TransitionSourceTrait"
         - $ref: "#/components/schemas/IndividualStrokesTrait"
+        - $ref: "#/components/schemas/VariableWidthStrokesTrait"
+        - $ref: "#/components/schemas/ComplexStrokesTrait"
         - $ref: "#/components/schemas/DevStatusTrait"
         - $ref: "#/components/schemas/AnnotationsTrait"
     DefaultShapeTraits:
@@ -3535,6 +3551,8 @@ components:
         - $ref: "#/components/schemas/HasEffectsTrait"
         - $ref: "#/components/schemas/HasMaskTrait"
         - $ref: "#/components/schemas/TransitionSourceTrait"
+        - $ref: "#/components/schemas/VariableWidthStrokesTrait"
+        - $ref: "#/components/schemas/ComplexStrokesTrait"
     CornerRadiusShapeTraits:
       allOf:
         - $ref: "#/components/schemas/DefaultShapeTraits"
@@ -3575,6 +3593,7 @@ components:
         - $ref: "#/components/schemas/WidgetNode"
         - $ref: "#/components/schemas/DocumentNode"
         - $ref: "#/components/schemas/CanvasNode"
+        - $ref: "#/components/schemas/SlotNode"
       discriminator:
         propertyName: type
         x-dart-type: NodeType
@@ -3608,6 +3627,7 @@ components:
           WIDGET: "#/components/schemas/WidgetNode"
           DOCUMENT: "#/components/schemas/DocumentNode"
           CANVAS: "#/components/schemas/CanvasNode"
+          SLOT: "#/components/schemas/SlotNode"
         x-dart-mapping:
           DOCUMENT: "#/components/schemas/DocumentNode"
           CANVAS: "#/components/schemas/CanvasNode"
@@ -3631,6 +3651,7 @@ components:
         - SECTION
         - SHAPE_WITH_TEXT
         - SLICE
+        - SLOT
         - STAR
         - STICKY
         - TABLE
@@ -3743,6 +3764,7 @@ components:
         - $ref: "#/components/schemas/VectorNode"
         - $ref: "#/components/schemas/WashiTapeNode"
         - $ref: "#/components/schemas/WidgetNode"
+        - $ref: "#/components/schemas/SlotNode"
       discriminator:
         propertyName: type
         x-dart-type: NodeType
@@ -3774,6 +3796,7 @@ components:
           VECTOR: "#/components/schemas/VectorNode"
           WASHI_TAPE: "#/components/schemas/WashiTapeNode"
           WIDGET: "#/components/schemas/WidgetNode"
+          SLOT: "#/components/schemas/SlotNode"
     BooleanOperationNode:
       x-dart-implements: [SubCanvasNode]
       allOf:
@@ -3839,6 +3862,20 @@ components:
               enum:
                 - FRAME
               description: The type of this node, represented by the string literal "FRAME"
+          required:
+            - type
+        - $ref: "#/components/schemas/FrameTraits"
+    SlotNode:
+      x-dart-type: Slot
+      x-dart-implements: [SubCanvasNode]
+      allOf:
+        - type: object
+          properties:
+            type:
+              type: string
+              enum:
+                - SLOT
+              description: The type of this node, represented by the string literal "SLOT"
           required:
             - type
         - $ref: "#/components/schemas/FrameTraits"
@@ -4053,6 +4090,7 @@ components:
           required:
             - type
         - $ref: "#/components/schemas/FrameTraits"
+        - $ref: "#/components/schemas/TransformModifiersTrait"
     SliceNode:
       x-dart-implements: [SubCanvasNode]
       allOf:
@@ -5395,6 +5433,7 @@ components:
           type: string
           description: Text casing applied to the node, default is the original casing.
           enum:
+            - ORIGINAL
             - UPPER
             - LOWER
             - TITLE
@@ -5584,6 +5623,7 @@ components:
         - BOOLEAN
         - INSTANCE_SWAP
         - TEXT
+        - SLOT
         - VARIANT
     InstanceSwapPreferredValue:
       type: object
@@ -5626,6 +5666,14 @@ components:
             $ref: "#/components/schemas/InstanceSwapPreferredValue"
           description: Preferred values for this property. Only applicable if type is
             `INSTANCE_SWAP`.
+        boundVariables:
+          type: object
+          x-dart-type: ComponentPropertyDefinitionVariables
+          default: {}
+          description: The variables bound to a particular field on this component property
+          properties:
+            defaultValue:
+              $ref: "#/components/schemas/VariableAlias"
       required:
         - type
         - defaultValue
@@ -5857,11 +5905,11 @@ components:
     Trigger:
       type: object
       description: |-
-        The `"ON_HOVER"` and `"ON_PRESS"` trigger types revert the navigation when the trigger is finished (the result is temporary). 
+        The `"ON_HOVER"` and `"ON_PRESS"` trigger types revert the navigation when the trigger is finished (the result is temporary).
         `"MOUSE_ENTER"`, `"MOUSE_LEAVE"`, `"MOUSE_UP"` and `"MOUSE_DOWN"` are permanent, one-way navigation.
         The `delay` parameter requires the trigger to be held for a certain duration of time before the action occurs.
         Both `timeout` and `delay` values are in milliseconds.
-        The `"ON_MEDIA_HIT"` and `"ON_MEDIA_END"` trigger types can only trigger from a video. 
+        The `"ON_MEDIA_HIT"` and `"ON_MEDIA_END"` trigger types can only trigger from a video.
         They fire when a video reaches a certain time or ends. The `timestamp` value is in seconds.
       oneOf:
         - $ref: "#/components/schemas/OnMouseInteractionTrigger"
@@ -6175,7 +6223,7 @@ components:
         The method of navigation. The possible values are:
         - `"NAVIGATE"`: Replaces the current screen with the destination, also closing all overlays.
         - `"OVERLAY"`: Opens the destination as an overlay on the current screen.
-        - `"SWAP"`: On an overlay, replaces the current (topmost) overlay with the destination. On a top-level frame, 
+        - `"SWAP"`: On an overlay, replaces the current (topmost) overlay with the destination. On a top-level frame,
           behaves the same as `"NAVIGATE"` except that no entry is added to the navigation history.
         - `"SCROLL_TO"`: Scrolls to the destination on the current screen.
         - `"CHANGE_TO"`: Changes the closest ancestor instance of source node to the specified variant.
@@ -7721,7 +7769,7 @@ components:
           type: string
           description: |-
             The current payment status of the user on the resource, as a string enum:
-              
+
             - `UNPAID`: user has not paid for the resource
             - `PAID`: user has an active purchase on the resource
             - `TRIAL`: user is in the trial period for a subscription resource
@@ -7756,7 +7804,7 @@ components:
           format: date-time
           description: |-
             The UTC ISO 8601 timestamp indicating when the user purchased the resource. No value is given if the user has never purchased the resource.
-              
+
             Note that a value will still be returned if the user had purchased the resource, but no longer has active access to it (e.g. purchase refunded, subscription ended).
       required:
         - user_id
@@ -7859,6 +7907,11 @@ components:
               modeId:
                 type: string
                 description: The unique identifier of this mode.
+              parentModeId:
+                type: string
+                description: The unique identifier of this mode's parent mode from the parent
+                  variable collection. This will be `undefined` if this mode
+                  does not inherit from a parent mode.
               name:
                 type: string
                 description: The name of this mode.
@@ -7871,6 +7924,31 @@ components:
         remote:
           type: boolean
           description: Whether this variable collection is remote.
+        isExtension:
+          type: boolean
+          description: Whether this variable collection is an extension of another
+            variable collection.
+        parentVariableCollectionId:
+          type: string
+          description: The id of the parent variable collection that this variable
+            collection is an extension of. If this variable collection is not an
+            extension, this value will be `undefined`.
+        rootVariableCollectionId:
+          type: string
+          description: The id of the root variable collection in the extension chain. This
+            is the ID of the original (non-extended) collection at the top of
+            the parent chain. For example, if Collection C extends B which
+            extends A (root), then `rootVariableCollectionId` is A's ID. If this
+            variable collection is not an extension, this value will be
+            `undefined`.
+        variableOverrides:
+          type: object
+          description: The overrides for the variables in this variable collection as a
+            map of variable ids to a map of mode ids to variable values.
+          additionalProperties:
+            type: object
+            additionalProperties:
+              $ref: "#/components/schemas/VariableValue"
         hiddenFromPublishing:
           type: boolean
           description: Whether this variable collection is hidden when publishing the
@@ -8053,6 +8131,16 @@ components:
           description: Whether this variable collection is hidden when publishing the
             current file as a library.
           default: false
+        parentVariableCollectionId:
+          type: string
+          description: The id of the parent variable collection that this variable
+            collection is extending from.
+        initialModeIdToParentModeIdMapping:
+          type: object
+          description: Maps inherited modes from the parent variable collection to the
+            initial mode ids on the extended variable collection.
+          additionalProperties:
+            type: string
       required:
         - action
         - name
@@ -8123,7 +8211,8 @@ components:
         variableCollectionId:
           type: string
           description: The variable collection that will contain the mode. You can use the
-            temporary id of a variable collection.
+            temporary id of a variable collection. New modes cannot be created
+            on extended collections.
       required:
         - action
         - name
@@ -8145,7 +8234,8 @@ components:
           description: The name of this variable mode.
         variableCollectionId:
           type: string
-          description: The variable collection that contains the mode.
+          description: The variable collection that contains the mode. Modes cannot be
+            updated on extended collections.
       required:
         - action
         - id
@@ -8161,7 +8251,8 @@ components:
             - DELETE
         id:
           type: string
-          description: The id of the variable mode to delete.
+          description: The id of the variable mode to delete. Modes cannot be deleted on
+            extended collections unless its parent mode has been deleted.
       required:
         - action
         - id
@@ -8301,7 +8392,8 @@ components:
     VariableValue:
       description: The value for the variable. The value must match the variable's
         type. If setting to a variable alias, the alias must resolve to this
-        type.
+        type. If overriding a value, the value type must match the variable's
+        type. If removing an overridden value, the value must be `null`.
       oneOf:
         - type: boolean
         - type: number
@@ -8309,6 +8401,7 @@ components:
         - $ref: "#/components/schemas/RGB"
         - $ref: "#/components/schemas/RGBA"
         - $ref: "#/components/schemas/VariableAlias"
+        - type: "null"
         - $ref: "#/components/schemas/Expression"
     DevResource:
       type: object
